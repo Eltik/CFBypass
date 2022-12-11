@@ -113,3 +113,6 @@ cf.request('https://myapi.com/utils/', { method: "POST", headers: { Referer: "ht
     //  ]
 });
 ```
+
+### Bypassing Captchas
+From my knowledge, the `cloudscraper` library bypasses hCaptcha and stormwall. It unfortunately does not bypass 2captcha as there isn't much of a way currently do such a thing without a headless browser or buying captcha keys. If you get an error saying that the site cannot be bypassed because it is in, "Under Attack Mode" and you have to buy the paid version, the site most likely has a captcha that's not bypassable. If you absolutely need to bypass it, try [PupFlare](https://github.com/unixfox/pupflare). But again, there currently is no good way to bypass 2captcha without buying keys or using a headless browser like Puppeteer or Playwright.
