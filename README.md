@@ -84,7 +84,9 @@ const CF = require('../CF').default;
 const cf = new CF(true);
 
 // Basic post request.
-cf.get('https://myapi.com/utils/', { method: "POST", headers: { Referer: "https://mysite.com/" }, body: { "id": 5012 }}).then((res) => {
+// You can use cf.request to send a raw request and provide the method, or you can just use cf.post to send a POST request.
+// The post and get functions override the method provided. So yes, you could do cf.post("url", { method: "GET" }) and it'll send a POST request.
+cf.request('https://myapi.com/utils/', { method: "POST", headers: { Referer: "https://mysite.com/" }, body: { "id": 5012 }}).then((res) => {
     // Logs the response text.
     console.log(res.text());
     // Or if you want to get JSON data, unlike node-fetch you can get both at the same time:
