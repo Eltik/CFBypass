@@ -50,8 +50,8 @@ exports.__esModule = true;
 var child_process_1 = require("child_process");
 var path_1 = require("path");
 var CloudScraper = /** @class */ (function () {
-    function CloudScraper() {
-        // TBD
+    function CloudScraper(isPython3) {
+        this.isPython3 = isPython3;
     }
     CloudScraper.prototype.get = function (url, options) {
         if (options === void 0) { options = {}; }
@@ -152,6 +152,7 @@ var CloudScraper = /** @class */ (function () {
     CloudScraper.prototype.request = function (url, options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
             return __generator(this, function (_a) {
                 return [2 /*return*/, new Promise(function (resolve, reject) {
                         var args = [(0, path_1.join)(__dirname, "index.py")];
@@ -166,7 +167,7 @@ var CloudScraper = /** @class */ (function () {
                             args.push("--data", JSON.stringify(options.body));
                         }
                         var result = [];
-                        var childProcess = (0, child_process_1.spawn)("python3", args);
+                        var childProcess = (0, child_process_1.spawn)(_this.isPython3 ? "python3" : "python", args);
                         childProcess.stdout.setEncoding("utf8");
                         childProcess.stdout.on("data", function (data) {
                             var _a;

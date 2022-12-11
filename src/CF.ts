@@ -2,8 +2,10 @@ import { spawn } from "child_process";
 import { join } from "path";
 
 class CloudScraper {
-    constructor() {
-        // TBD
+    private isPython3:boolean;
+
+    constructor(isPython3:boolean) {
+        this.isPython3 = isPython3;
     }
 
     public async get(url: string, options: Options = {}): Promise<Response> {
@@ -75,7 +77,7 @@ class CloudScraper {
 
             const result:any[] = [];
 
-            const childProcess = spawn("python3", args);
+            const childProcess = spawn(this.isPython3 ? "python3" : "python", args);
             
             childProcess.stdout.setEncoding("utf8");
             childProcess.stdout.on("data", (data) => {

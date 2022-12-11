@@ -1,5 +1,7 @@
 var CF = require('../CF').default;
-var cf = new CF();
+// If your machine uses python3, input "true" in the constructor.
+// By default CF uses python.
+var cf = new CF(true);
 // Basic get request.
 cf.get('https://www.wcofun.net/dubbed-anime-list', { method: "GET" }).then(function (res) {
     // Logs the response text.
