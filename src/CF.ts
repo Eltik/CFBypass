@@ -15,7 +15,12 @@ class CloudScraper {
             ...options,
             method: "GET"
         };
-        const response = await this.request(url, options);
+        
+        const request:Request = {
+            url,
+            options
+        };
+        const response = await this.request(request);
         return response;
     }
 
@@ -25,7 +30,12 @@ class CloudScraper {
             ...options,
             method: "POST"
         };
-        const response = await this.request(url, options);
+
+        const request:Request = {
+            url,
+            options
+        };
+        const response = await this.request(request);
         return response;
     }
 
@@ -35,7 +45,12 @@ class CloudScraper {
             ...options,
             method: "COOKIE"
         };
-        const response = await this.request(url, options);
+        
+        const request:Request = {
+            url,
+            options
+        };
+        const response = await this.request(request);
         return response;
     }
 
@@ -45,7 +60,12 @@ class CloudScraper {
             ...options,
             method: "TOKENS"
         };
-        const response = await this.request(url, options);
+
+        const request:Request = {
+            url,
+            options
+        };
+        const response = await this.request(request);
         return response;
     }
 
@@ -66,7 +86,10 @@ class CloudScraper {
     }
 
     // @param url: string options: Options = {}
-    public async request(url: string, options: Options = {}): Promise<Response> {
+    public async request(request:Request): Promise<Response> {
+        const url = request.url;
+        const options = request.options;
+
         return new Promise((resolve, reject) => {
             const args:string[] = [join(__dirname, "index.py")];
             args.push("--url", url);
@@ -134,6 +157,7 @@ class CloudScraper {
 
                 if (errors.length > 0) {
                     reject({
+                        request,
                         status: 500,
                         statusText: "ERROR",
                         error: errors,
@@ -142,6 +166,7 @@ class CloudScraper {
                     })
                 } else {
                     resolve({
+                        request,
                         status: statusCode,
                         statusText: "OK",
                         error: errors,
@@ -184,10 +209,8 @@ class CloudScraper {
     }
 }
 
-export default CloudScraper;
-
 type Options = {
-    method?: Method | string;
+    method?: Method | string; // Someone fix this please
     headers?: { [key: string]: string };
     body?: string;
 };
@@ -206,9 +229,18 @@ type Method = {
 };
 
 interface Response {
+    request: Request;
     status: number;
     statusText: string;
     error: string[];
     text: ()=>string;
     json: ()=>string;
-}
+};
+
+interface Request {
+    url: string;
+    options: Options;
+};
+
+export default CloudScraper;
+export type { Options, Method, Response, Request };

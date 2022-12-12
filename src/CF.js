@@ -58,12 +58,16 @@ var CloudScraper = /** @class */ (function () {
     CloudScraper.prototype.get = function (url, options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
-            var response;
+            var request, response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         options = __assign(__assign({}, options), { method: "GET" });
-                        return [4 /*yield*/, this.request(url, options)];
+                        request = {
+                            url: url,
+                            options: options
+                        };
+                        return [4 /*yield*/, this.request(request)];
                     case 1:
                         response = _a.sent();
                         return [2 /*return*/, response];
@@ -75,12 +79,16 @@ var CloudScraper = /** @class */ (function () {
     CloudScraper.prototype.post = function (url, options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
-            var response;
+            var request, response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         options = __assign(__assign({}, options), { method: "POST" });
-                        return [4 /*yield*/, this.request(url, options)];
+                        request = {
+                            url: url,
+                            options: options
+                        };
+                        return [4 /*yield*/, this.request(request)];
                     case 1:
                         response = _a.sent();
                         return [2 /*return*/, response];
@@ -92,12 +100,16 @@ var CloudScraper = /** @class */ (function () {
     CloudScraper.prototype.cookie = function (url, options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
-            var response;
+            var request, response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         options = __assign(__assign({}, options), { method: "COOKIE" });
-                        return [4 /*yield*/, this.request(url, options)];
+                        request = {
+                            url: url,
+                            options: options
+                        };
+                        return [4 /*yield*/, this.request(request)];
                     case 1:
                         response = _a.sent();
                         return [2 /*return*/, response];
@@ -109,12 +121,16 @@ var CloudScraper = /** @class */ (function () {
     CloudScraper.prototype.tokens = function (url, options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
-            var response;
+            var request, response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         options = __assign(__assign({}, options), { method: "TOKENS" });
-                        return [4 /*yield*/, this.request(url, options)];
+                        request = {
+                            url: url,
+                            options: options
+                        };
+                        return [4 /*yield*/, this.request(request)];
                     case 1:
                         response = _a.sent();
                         return [2 /*return*/, response];
@@ -155,11 +171,13 @@ var CloudScraper = /** @class */ (function () {
         });
     };
     // @param url: string options: Options = {}
-    CloudScraper.prototype.request = function (url, options) {
-        if (options === void 0) { options = {}; }
+    CloudScraper.prototype.request = function (request) {
         return __awaiter(this, void 0, void 0, function () {
+            var url, options;
             var _this = this;
             return __generator(this, function (_a) {
+                url = request.url;
+                options = request.options;
                 return [2 /*return*/, new Promise(function (resolve, reject) {
                         var args = [(0, path_1.join)(__dirname, "index.py")];
                         args.push("--url", url);
@@ -221,6 +239,7 @@ var CloudScraper = /** @class */ (function () {
                             }
                             if (errors.length > 0) {
                                 reject({
+                                    request: request,
                                     status: 500,
                                     statusText: "ERROR",
                                     error: errors,
@@ -230,6 +249,7 @@ var CloudScraper = /** @class */ (function () {
                             }
                             else {
                                 resolve({
+                                    request: request,
                                     status: statusCode,
                                     statusText: "OK",
                                     error: errors,
@@ -273,4 +293,6 @@ var CloudScraper = /** @class */ (function () {
     };
     return CloudScraper;
 }());
+;
+;
 exports["default"] = CloudScraper;
