@@ -146,6 +146,13 @@ class CloudScraper {
             })
         })
     }
+
+    public setPython3(isPython3:boolean) {
+        this.isPython3 = isPython3;
+    }
+
+    public async install() {
+    }
 }
 
 export default CloudScraper;

@@ -1,7 +1,10 @@
-import cloudscraper
+from cfscraper import cloudscraper
 import argparse
 import json
 import time
+import sys
+
+sys.path.insert(0, '/src/cfscraper')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--url')
