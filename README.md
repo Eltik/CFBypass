@@ -71,12 +71,24 @@ type Method = {
 Finally, the functions all return a `Promise<Response>`. It features a `text()` function, `json()` function, and any errors in an array:
 ```typescript
 interface Response {
+    request: Request;
     status: number;
     statusText: string;
     error: string[];
     text: ()=>string;
     json: ()=>string;
-}
+};
+
+interface Request {
+    url: string;
+    options: Options;
+};
+
+type Options = {
+    method?: Method | string; // Someone fix this please
+    headers?: { [key: string]: string };
+    body?: string;
+};
 ```
 Here is an example for sending requests to an API:
 ```js
