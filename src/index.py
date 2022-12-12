@@ -18,7 +18,7 @@ try:
             req = cloudscraper.create_scraper().get(args.url, timeout=3, headers=headers)
         else:
             req = cloudscraper.create_scraper().get(args.url, timeout=3)
-        print(req.text)
+        print(req.text.encode("UTF-8"))
         print("{ statusCode: " + str(req.status_code) + " }")
     elif args.method == "POST":
         json_data = json.loads(args.data)
