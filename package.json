@@ -2,5 +2,30 @@
   "devDependencies": {
     "@types/node": "^18.11.13",
     "typescript": "^4.9.4"
-  }
+  },
+  "name": "cfbypass",
+  "description": "Python based CloudFlare bypass. Utilizes [VeNoMouS's CloudScraper](https://github.com/VeNoMouS/cloudscraper) project to bypass CloudFlare. All credit goes to him.",
+  "version": "0.0.1",
+  "main": "./src/CF.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "./tests/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eltik/CFBypass.git"
+  },
+  "keywords": [
+    "cloudflare",
+    "request",
+    "bypass"
+  ],
+  "author": "Eltik",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Eltik/CFBypass/issues"
+  },
+  "homepage": "https://github.com/Eltik/CFBypass#readme"
 }
