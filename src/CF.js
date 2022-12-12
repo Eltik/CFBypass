@@ -50,9 +50,11 @@ exports.__esModule = true;
 var child_process_1 = require("child_process");
 var path_1 = require("path");
 var CloudScraper = /** @class */ (function () {
+    // If you are using Python 3, set this to true
     function CloudScraper(isPython3) {
         this.isPython3 = isPython3;
     }
+    // @param url: string options: Options = {}
     CloudScraper.prototype.get = function (url, options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
@@ -69,6 +71,7 @@ var CloudScraper = /** @class */ (function () {
             });
         });
     };
+    // @param url: string options: Options = {}
     CloudScraper.prototype.post = function (url, options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
@@ -85,6 +88,7 @@ var CloudScraper = /** @class */ (function () {
             });
         });
     };
+    // @param url: string options: Options = {}
     CloudScraper.prototype.cookie = function (url, options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
@@ -101,6 +105,7 @@ var CloudScraper = /** @class */ (function () {
             });
         });
     };
+    // @param url: string options: Options = {}
     CloudScraper.prototype.tokens = function (url, options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
@@ -149,6 +154,7 @@ var CloudScraper = /** @class */ (function () {
             });
         });
     };
+    // @param url: string options: Options = {}
     CloudScraper.prototype.request = function (url, options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
@@ -236,13 +242,16 @@ var CloudScraper = /** @class */ (function () {
             });
         });
     };
+    // @param isPython3: boolean
     CloudScraper.prototype.setPython3 = function (isPython3) {
         this.isPython3 = isPython3;
     };
-    CloudScraper.prototype.install = function () {
+    // @param isPython3: boolean
+    CloudScraper.prototype.install = function (isPython3) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
+                isPython3 = isPython3 !== null && isPython3 !== void 0 ? isPython3 : this.isPython3;
                 return [2 /*return*/, new Promise(function (resolve, reject) {
                         var args = [(0, path_1.join)(__dirname, "/cfscraper/setup.py")];
                         args.push("install");
