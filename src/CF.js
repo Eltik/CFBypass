@@ -236,6 +236,32 @@ var CloudScraper = /** @class */ (function () {
             });
         });
     };
+    CloudScraper.prototype.setPython3 = function (isPython3) {
+        this.isPython3 = isPython3;
+    };
+    CloudScraper.prototype.install = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        var args = [(0, path_1.join)(__dirname, "/cfscraper/setup.py")];
+                        args.push("install");
+                        var childProcess = (0, child_process_1.spawn)(_this.isPython3 ? "python3" : "python", args);
+                        childProcess.stdout.setEncoding("utf8");
+                        childProcess.stdout.on("data", function (data) {
+                            console.log(data);
+                        });
+                        childProcess.stderr.setEncoding('utf8');
+                        childProcess.stderr.on("data", function (err) {
+                            reject(err);
+                        });
+                        childProcess.on('exit', function () {
+                            resolve(true);
+                        });
+                    })];
+            });
+        });
+    };
     return CloudScraper;
 }());
 exports["default"] = CloudScraper;

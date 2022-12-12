@@ -1,7 +1,6 @@
 from cfscraper import cloudscraper
 import argparse
 import json
-import time
 import sys
 
 sys.path.insert(0, '/src/cfscraper')

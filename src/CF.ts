@@ -4,10 +4,12 @@ import { join } from "path";
 class CloudScraper {
     private isPython3:boolean;
 
+    // If you are using Python 3, set this to true
     constructor(isPython3:boolean) {
         this.isPython3 = isPython3;
     }
 
+    // @param url: string options: Options = {}
     public async get(url: string, options: Options = {}): Promise<Response> {
         options = {
             ...options,
@@ -17,6 +19,7 @@ class CloudScraper {
         return response;
     }
 
+    // @param url: string options: Options = {}
     public async post(url: string, options: Options = {}): Promise<Response> {
         options = {
             ...options,
@@ -26,6 +29,7 @@ class CloudScraper {
         return response;
     }
 
+    // @param url: string options: Options = {}
     public async cookie(url: string, options: Options = {}): Promise<Response> {
         options = {
             ...options,
@@ -35,6 +39,7 @@ class CloudScraper {
         return response;
     }
 
+    // @param url: string options: Options = {}
     public async tokens(url: string, options: Options = {}): Promise<Response> {
         options = {
             ...options,
@@ -60,6 +65,7 @@ class CloudScraper {
         throw new Error("PUT is not supported! Development is in progress.");
     }
 
+    // @param url: string options: Options = {}
     public async request(url: string, options: Options = {}): Promise<Response> {
         return new Promise((resolve, reject) => {
             const args:string[] = [join(__dirname, "index.py")];
@@ -147,11 +153,34 @@ class CloudScraper {
         })
     }
 
+    // @param isPython3: boolean
     public setPython3(isPython3:boolean) {
         this.isPython3 = isPython3;
     }
 
-    public async install() {
+    // @param isPython3: boolean
+    public async install(isPython3?:boolean) {
+        isPython3 = isPython3 ?? this.isPython3;
+        return new Promise((resolve, reject) => {
+            const args:string[] = [join(__dirname, "/cfscraper/setup.py")];
+            args.push("install");
+            
+            const childProcess = spawn(this.isPython3 ? "python3" : "python", args);
+            
+            childProcess.stdout.setEncoding("utf8");
+            childProcess.stdout.on("data", (data) => {
+                console.log(data);
+            })
+            
+            childProcess.stderr.setEncoding('utf8');
+            childProcess.stderr.on("data", (err) => {
+                reject(err);
+            })
+            
+            childProcess.on('exit', () => {
+                resolve(true);
+            })
+        })
     }
 }
 
