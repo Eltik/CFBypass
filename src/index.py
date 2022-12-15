@@ -2,6 +2,7 @@ from cfscraper import cloudscraper
 import argparse
 import json
 import sys
+from base64 import urlsafe_b64encode
 
 sys.path.insert(0, '/src/cfscraper')
 
@@ -20,8 +21,7 @@ try:
             req = cloudscraper.create_scraper().get(args.url, timeout=3, headers=headers)
         else:
             req = cloudscraper.create_scraper().get(args.url, timeout=3)
-        print(req.text.encode("UTF-8"))
-        print("{ statusCode: " + str(req.status_code) + " }")
+        print(urlsafe_b64encode(req.text.encode("UTF-8")))
     elif args.method == "POST":
         json_data = json.loads(args.data)
         req = None
@@ -30,8 +30,7 @@ try:
             req = cloudscraper.create_scraper().post(args.url, data=json_data, timeout=3, headers=headers)
         else:
             req = cloudscraper.create_scraper().post(args.url, data=json_data, timeout=3)
-        print(req.text)
-        print("{ statusCode: " + str(req.status_code) + " }")
+        print(urlsafe_b64encode(req.text.encode("UTF-8")))
     elif args.method == "COOKIE":
         print(cloudscraper.get_cookie_string(args.url))
     elif args.method == "TOKENS":
@@ -43,7 +42,6 @@ try:
             req = cloudscraper.create_scraper().get(args.url, timeout=3, headers=headers)
         else:
             req = cloudscraper.create_scraper().get(args.url, timeout=3)
-        print(req.text)
-        print("{ statusCode: " + str(req.status_code) + " }")
+        print(urlsafe_b64encode(req.text.encode("UTF-8")))
 except:
     raise Exception("Could not send data to " + args.url + " with request data " + args.data + ".")

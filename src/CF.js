@@ -49,10 +49,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var child_process_1 = require("child_process");
 var path_1 = require("path");
+var js_base64_1 = require("js-base64");
 var CloudScraper = /** @class */ (function () {
     // If you are using Python 3, set this to true
     function CloudScraper(isPython3) {
-        this.isPython3 = isPython3;
+        this.isPython3 = isPython3 !== null && isPython3 !== void 0 ? isPython3 : false;
+        this.get = this.get.bind(this);
+        this.post = this.post.bind(this);
+        this.cookie = this.cookie.bind(this);
+        this.tokens = this.tokens.bind(this);
+        this.request = this.request.bind(this);
+        this.install = this.install.bind(this);
     }
     // @param url: string options: Options = {}
     CloudScraper.prototype.get = function (url, options) {
@@ -181,6 +188,7 @@ var CloudScraper = /** @class */ (function () {
                 return [2 /*return*/, new Promise(function (resolve, reject) {
                         var args = [(0, path_1.join)(__dirname, "index.py")];
                         args.push("--url", url);
+                        var stringedData = "";
                         if (options.method) {
                             args.push("--method", String(options.method));
                         }
@@ -190,53 +198,24 @@ var CloudScraper = /** @class */ (function () {
                         if (options.body) {
                             args.push("--data", JSON.stringify(options.body));
                         }
-                        var result = [];
+                        var errors = [];
                         var childProcess = (0, child_process_1.spawn)(_this.isPython3 ? "python3" : "python", args);
                         childProcess.stdout.setEncoding("utf8");
                         childProcess.stdout.on("data", function (data) {
-                            var _a;
-                            // GitHub CoPilot moment
-                            if (data.includes("statusCode")) {
-                                var statusCode = data.split("{ statusCode")[1];
-                                statusCode = statusCode.split("}")[0];
-                                statusCode = statusCode.split(":")[1];
-                                statusCode = statusCode.trim();
-                                result.push({
-                                    "status": Number(data)
-                                });
-                                result.push({
-                                    "data": (_a = data.split("{ statusCode")[0]) === null || _a === void 0 ? void 0 : _a.trim()
-                                });
-                            }
-                            else {
-                                result.push({
-                                    "data": data
-                                });
-                            }
+                            data = String(data);
+                            stringedData += data;
                         });
                         childProcess.stderr.setEncoding('utf8');
                         childProcess.stderr.on("data", function (err) {
                             err = String(err).trim();
                             err = err.replaceAll("\n", " ");
-                            result.push({
+                            errors.push({
                                 "error": String(err).trim()
                             });
                         });
                         childProcess.on('exit', function () {
-                            var data = "";
+                            var data = (0, js_base64_1.decode)(stringedData.substring(2).substring(0, stringedData.length - 1));
                             var statusCode = 200;
-                            var errors = [];
-                            for (var i = 0; i < result.length; i++) {
-                                if (result[i].error) {
-                                    errors.push(result[i]);
-                                }
-                                else if (result[i].data) {
-                                    data += result[i].data;
-                                }
-                                else if (result[i].status) {
-                                    statusCode = result[i].status;
-                                }
-                            }
                             if (errors.length > 0) {
                                 reject({
                                     request: request,
@@ -267,11 +246,10 @@ var CloudScraper = /** @class */ (function () {
         this.isPython3 = isPython3;
     };
     // @param isPython3: boolean
-    CloudScraper.prototype.install = function (isPython3) {
+    CloudScraper.prototype.install = function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
-                isPython3 = isPython3 !== null && isPython3 !== void 0 ? isPython3 : this.isPython3;
                 return [2 /*return*/, new Promise(function (resolve, reject) {
                         var args = [(0, path_1.join)(__dirname, "/cfscraper/setup.py")];
                         args.push("install");

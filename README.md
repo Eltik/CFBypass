@@ -5,7 +5,7 @@ Python based CloudFlare bypass. Utilizes [VeNoMouS's CloudScraper](https://githu
 THIS NEEDS TO BE UPDATED<br />
 <b>Prerequisites</b>: Python (version 3.10 or higher), NodeJS (comes with NPM), TypeScript (only if you're cloning the repository).<br /><br />
 1. Run `pip install cloudscraper` or clone VeNoMouS's [repository](https://github.com/VeNoMouS/cloudscraper). All this project does is "port" his Python code and make it JavaScript friendly.
-2. Run `npm i cfbypass` or clone the GitHub repository using `git clone https://github.com/Eltik/CFBypass`.
+2. Run `npm i cfbypass@latest` or clone the GitHub repository using `git clone https://github.com/Eltik/CFBypass`.
 
 ## How it Works
 All I've done is create a script that uses `child_process` to send `GET` and `POST` requests via the Python library `cloudscraper`. An `index.py` script that uses the library is included and takes the following arguments:<br />
@@ -24,7 +24,7 @@ args.push("--url", url);
 args.push("--method", method);
 ...
 ```
-That's pretty much the gist of this works.
+Slightly irrelevant, but to transfer Python output to JavaScript-friendly code (output contains annoying characters like `\n`, `\r`, etc.), the Python script will print in base64. This package will automatically decode the base64 data to then output NodeJS-friendly HTML. That's pretty much the gist of this works.
 
 ## Contribution
 I unfortunately am not familiar with TypeScript (and especially not Python) as much as I am with vanilla JS, so there are not a ton of features quite yet. However, since I'm learning I would be more than happy if you want to create PR requests, issues, or give suggestions. My Discord server is also [here](https://discord.gg/F87wYBtnkC) if you need to contact me.
@@ -127,4 +127,4 @@ cf.request('https://myapi.com/utils/', { method: "POST", headers: { Referer: "ht
 ```
 
 ### Bypassing Captchas
-From my knowledge, the `cloudscraper` library bypasses hCaptcha and stormwall. It unfortunately does not bypass 2captcha as there isn't much of a way currently do such a thing without a headless browser or buying captcha keys. If you get an error saying that the site cannot be bypassed because it is in, "Under Attack Mode" and you have to buy the paid version, the site most likely has a captcha that's not bypassable. If you absolutely need to bypass it, try [PupFlare](https://github.com/unixfox/pupflare). But again, there currently is no good way to bypass 2captcha without buying keys or using a headless browser like Puppeteer or Playwright.
+From my knowledge, the `cloudscraper` library bypasses hCaptcha and stormwall. It unfortunately does not bypass 2captcha as there isn't much of a way currently do such a thing without a headless browser or buying captcha keys. If you get an error saying that the site cannot be bypassed because it is in "Under Attack Mode" and you have to buy the paid version, the site most likely has a captcha that's not bypassable. If you absolutely need to bypass it, try [PupFlare](https://github.com/unixfox/pupflare). But again, there currently is no good way to bypass 2captcha without buying keys or using a headless browser like Puppeteer or Playwright.
