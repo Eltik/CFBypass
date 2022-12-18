@@ -152,6 +152,7 @@ class CloudScraper {
                         status: statusCode,
                         statusText: "OK",
                         error: errors,
+                        raw: () => stringedData,
                         text: () => data,
                         json: () => JSON.parse(data)
                     });
@@ -214,6 +215,7 @@ interface Response {
     status: number;
     statusText: string;
     error: string[];
+    raw: ()=>string;
     text: ()=>string;
     json: ()=>string;
 };
