@@ -232,6 +232,7 @@ var CloudScraper = /** @class */ (function () {
                                     status: statusCode,
                                     statusText: "OK",
                                     error: errors,
+                                    raw: function () { return stringedData; },
                                     text: function () { return data; },
                                     json: function () { return JSON.parse(data); }
                                 });
