@@ -50,6 +50,7 @@ exports.__esModule = true;
 var child_process_1 = require("child_process");
 var path_1 = require("path");
 var js_base64_1 = require("js-base64");
+var cheerio_1 = require("cheerio");
 var CloudScraper = /** @class */ (function () {
     // If you are using Python 3, set this to true
     function CloudScraper(isPython3) {
@@ -60,6 +61,9 @@ var CloudScraper = /** @class */ (function () {
         this.tokens = this.tokens.bind(this);
         this.request = this.request.bind(this);
         this.install = this.install.bind(this);
+        this.setPython3 = this.setPython3.bind(this);
+        this.solveCaptcha3 = this.solveCaptcha3.bind(this);
+        this.solveCaptcha3FromHTML = this.solveCaptcha3FromHTML.bind(this);
     }
     // @param url: string options: Options = {}
     CloudScraper.prototype.get = function (url, options) {
@@ -240,6 +244,65 @@ var CloudScraper = /** @class */ (function () {
                             }
                         });
                     })];
+            });
+        });
+    };
+    // @param token: string
+    CloudScraper.prototype.solveCaptcha3 = function (url, key, anchorLink) {
+        return __awaiter(this, void 0, void 0, function () {
+            var uri, domain, keyReq, data, v, curK, curV, anchor, req, $, reCaptchaToken;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        uri = new URL(url);
+                        domain = uri.protocol + '//' + uri.host;
+                        return [4 /*yield*/, this.get("https://www.google.com/recaptcha/api.js?render=".concat(key), {
+                                headers: {
+                                    Referer: domain
+                                }
+                            })];
+                    case 1:
+                        keyReq = _a.sent();
+                        data = keyReq.text();
+                        v = data.substring(data.indexOf('/releases/'), data.lastIndexOf('/recaptcha')).split('/releases/')[1];
+                        curK = anchorLink.split('k=')[1].split('&')[0];
+                        curV = anchorLink.split("v=")[1].split("&")[0];
+                        anchor = anchorLink.replace(curK, key).replace(curV, v);
+                        return [4 /*yield*/, this.get(anchor)];
+                    case 2:
+                        req = _a.sent();
+                        $ = (0, cheerio_1.load)(req.text());
+                        reCaptchaToken = $('input[id="recaptcha-token"]').attr('value');
+                        if (!reCaptchaToken)
+                            throw new Error('reCaptcha token not found');
+                        return [2 /*return*/, reCaptchaToken];
+                }
+            });
+        });
+    };
+    CloudScraper.prototype.solveCaptcha3FromHTML = function (url, html, anchorLink) {
+        return __awaiter(this, void 0, void 0, function () {
+            var $, captcha, captchaURI, captchaId, captchaKey;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        $ = (0, cheerio_1.load)(html);
+                        captcha = null;
+                        $("script").map(function (index, element) {
+                            if ($(element).attr("src") != undefined && $(element).attr("src").includes("/recaptcha/")) {
+                                captcha = $(element).attr("src");
+                            }
+                        });
+                        if (!captcha) {
+                            throw new Error("Couldn't fetch captcha.");
+                        }
+                        captchaURI = new URL(captcha);
+                        captchaId = captchaURI.searchParams.get("render");
+                        return [4 /*yield*/, this.solveCaptcha3(url, captchaId, anchorLink)];
+                    case 1:
+                        captchaKey = _a.sent();
+                        return [2 /*return*/, captchaKey];
+                }
             });
         });
     };

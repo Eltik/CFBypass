@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import { join } from "path";
 import { decode } from "js-base64";
+import { load } from "cheerio";
 
 class CloudScraper {
     private isPython3:boolean;
@@ -14,6 +15,9 @@ class CloudScraper {
         this.tokens = this.tokens.bind(this);
         this.request = this.request.bind(this);
         this.install = this.install.bind(this);
+        this.setPython3 = this.setPython3.bind(this);
+        this.solveCaptcha3 = this.solveCaptcha3.bind(this);
+        this.solveCaptcha3FromHTML = this.solveCaptcha3FromHTML.bind(this);
     }
 
     // @param url: string options: Options = {}
@@ -160,6 +164,56 @@ class CloudScraper {
                 }
             })
         })
+    }
+
+    // @param token: string
+    public async solveCaptcha3(url: string, key: string, anchorLink: string): Promise<string> {
+        const uri = new URL(url);
+        const domain = uri.protocol + '//' + uri.host;
+
+        const keyReq = await this.get(`https://www.google.com/recaptcha/api.js?render=${key}`, {
+            headers: {
+                Referer: domain,
+            },
+        });
+
+        const data = keyReq.text();
+
+        const v = data.substring(data.indexOf('/releases/'), data.lastIndexOf('/recaptcha')).split('/releases/')[1];
+
+        // ANCHOR IS SPECIFIC TO SITE
+        const curK = anchorLink.split('k=')[1].split('&')[0];
+        const curV = anchorLink.split("v=")[1].split("&")[0];
+
+        const anchor = anchorLink.replace(curK, key).replace(curV, v);
+
+        const req = await this.get(anchor);
+        const $ = load(req.text());
+        const reCaptchaToken = $('input[id="recaptcha-token"]').attr('value')
+
+        if (!reCaptchaToken) throw new Error('reCaptcha token not found')
+
+        return reCaptchaToken;
+    }
+
+    public async solveCaptcha3FromHTML(url: string, html: string, anchorLink: string) {
+        const $ = load(html);
+
+        let captcha = null;
+        $("script").map((index, element) => {
+            if ($(element).attr("src") != undefined && $(element).attr("src").includes("/recaptcha/")) {
+                captcha = $(element).attr("src");
+            }
+        })
+
+        if (!captcha) {
+            throw new Error("Couldn't fetch captcha.");
+        }
+
+        let captchaURI = new URL(captcha);
+        const captchaId = captchaURI.searchParams.get("render");
+        const captchaKey = await this.solveCaptcha3(url, captchaId, anchorLink);
+        return captchaKey;
     }
 
     // @param isPython3: boolean

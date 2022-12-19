@@ -68,7 +68,7 @@ type Method = {
     "HEAD"?: string;
 };
 ```
-Finally, the functions all return a `Promise<Response>`. It features a `text()` function, `json()` function, and any errors in an array:
+All request functions return a `Promise<Response>`. It features a `text()` function, `json()` function, and any errors in an array:
 ```typescript
 interface Response {
     request: Request;
@@ -82,12 +82,6 @@ interface Response {
 interface Request {
     url: string;
     options: Options;
-};
-
-type Options = {
-    method?: Method | string; // Someone fix this please
-    headers?: { [key: string]: string };
-    body?: string;
 };
 ```
 Here is an example for sending requests to an API:
@@ -125,6 +119,26 @@ cf.request('https://myapi.com/utils/', { method: "POST", headers: { Referer: "ht
     //  ]
 });
 ```
+Finally, there is an `allowRedirect` parameter that requires a boolean. This will cause the function to follow the redirects of the site.
 
 ### Bypassing Captchas
-From my knowledge, the `cloudscraper` library bypasses hCaptcha and stormwall. It unfortunately does not bypass 2captcha as there isn't much of a way currently do such a thing without a headless browser or buying captcha keys. If you get an error saying that the site cannot be bypassed because it is in "Under Attack Mode" and you have to buy the paid version, the site most likely has a captcha that's not bypassable. If you absolutely need to bypass it, try [PupFlare](https://github.com/unixfox/pupflare). But again, there currently is no good way to bypass 2captcha without buying keys or using a headless browser like Puppeteer or Playwright.
+From my knowledge, the `cloudscraper` library bypasses hCaptcha and stormwall. It unfortunately does not bypass 2captcha as there isn't much of a way currently do such a thing without a headless browser or buying captcha keys. If you get an error saying that the site cannot be bypassed because it is in "Under Attack Mode" and you have to buy the paid version, the site most likely has a captcha that's not bypassable. If you absolutely need to bypass it, try [PupFlare](https://github.com/unixfox/pupflare). But again, there currently is no good way to bypass 2captcha without buying keys or using a headless browser like Puppeteer or Playwright.<br /><br />There is a very basic Captcha3 solver that's added to the package. You can either provide HTML to fetch the captcha key like this:
+```js
+cf.get("https://4anime.gg/baka-test-summon-the-beasts-2-840").then((data) => {
+    const html = data.text();
+    cf.solveCaptcha3FromHTML("https://4anime.gg/baka-test-summon-the-beasts-2-840", html, "https://www.google.com/recaptcha/api2/anchor?ar=1&k=6LcJeB8eAAAAAK9SJTPy75A2v4iIEOa-iNIpDzJM&co=aHR0cHM6Ly80YW5pbWUuZ2c6NDQz&hl=en&v=5qcenVbrhOy8zihcc2aHOWD4&size=invisible&cb=43vxlhw87qvp").then((data) => {
+        console.log(data);
+    }).catch((err) => {
+        console.error(err);
+    })
+})
+```
+Or you can provide the captcha key directly:
+```js
+cf.solveCaptcha3("https://4anime.gg/baka-test-summon-the-beasts-2-840", "6LcJeB8eAAAAAK9SJTPy75A2v4iIEOa-iNIpDzJM", "https://www.google.com/recaptcha/api2/anchor?ar=1&k=6LcJeB8eAAAAAK9SJTPy75A2v4iIEOa-iNIpDzJM&co=aHR0cHM6Ly80YW5pbWUuZ2c6NDQz&hl=en&v=5qcenVbrhOy8zihcc2aHOWD4&size=invisible&cb=43vxlhw87qvp").then((data) => {
+    console.log(data);
+}).catch((err) => {
+    console.error(err);
+})
+```
+The parameters required are the URL of the site (to add a referer) and a anchor for templating. The anchor link can be fetched from the network tab upon visiting the site. Please note that this feature <b>is mainly for advanced usage</b> if captcha bypassing is necessary.
