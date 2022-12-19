@@ -7,7 +7,7 @@ cf.install().then((data) => {
     console.error(err);
 })
 */
-cf.get("https://wcofun.net/").then((data) => {
+cf.get("https://animixplay.to/api/cW9TVRrMk16Y3pMVFhzM0dyVTh3ZTlPVFZSck1rMTZZM289", { allowRedirect: true }).then((data) => {
     console.log(data.text());
     console.log("Test successful!");
 }).catch((err) => {

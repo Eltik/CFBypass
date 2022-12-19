@@ -112,6 +112,7 @@ class CloudScraper {
             if (options.body) {
                 args.push("--data", JSON.stringify(options.body));
             }
+            args.push("--allow-redirect", options.allowRedirect ? "True" : "False");
 
             const errors:any[] = [];
 
@@ -212,6 +213,7 @@ type Options = {
     method?: Method["GET"] | Method["POST"] | Method["COOKIE"] | Method["TOKENS"];
     headers?: { [key: string]: string };
     body?: string;
+    allowRedirect?: boolean;
 };
 
 type Method = {

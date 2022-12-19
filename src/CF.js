@@ -198,6 +198,7 @@ var CloudScraper = /** @class */ (function () {
                         if (options.body) {
                             args.push("--data", JSON.stringify(options.body));
                         }
+                        args.push("--allow-redirect", options.allowRedirect ? "True" : "False");
                         var errors = [];
                         var childProcess = (0, child_process_1.spawn)(_this.isPython3 ? "python3" : "python", args);
                         childProcess.stdout.setEncoding("utf8");

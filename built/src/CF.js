@@ -95,6 +95,7 @@ class CloudScraper {
             if (options.body) {
                 args.push("--data", JSON.stringify(options.body));
             }
+            args.push("--allow-redirect", options.allowRedirect ? "True" : "False");
             const errors = [];
             const childProcess = (0, child_process_1.spawn)(this.isPython3 ? "python3" : "python", args);
             childProcess.stdout.setEncoding("utf8");
@@ -146,7 +147,9 @@ class CloudScraper {
         return new Promise((resolve, reject) => {
             const args = [(0, path_1.join)(__dirname, "/cfscraper/setup.py")];
             args.push("install");
-            const childProcess = (0, child_process_1.spawn)(this.isPython3 ? "python3" : "python", args);
+            const requestArgs = [(0, path_1.join)(__dirname, "/req/setup.py")];
+            requestArgs.push("install");
+            const childProcess = (0, child_process_1.spawn)(this.isPython3 ? "python3" : "python", requestArgs);
             childProcess.stdout.setEncoding("utf8");
             childProcess.stdout.on("data", (data) => {
                 console.log(data);
@@ -156,7 +159,18 @@ class CloudScraper {
                 reject(err);
             });
             childProcess.on('exit', () => {
-                resolve(true);
+                const childProcess = (0, child_process_1.spawn)(this.isPython3 ? "python3" : "python", args);
+                childProcess.stdout.setEncoding("utf8");
+                childProcess.stdout.on("data", (data) => {
+                    console.log(data);
+                });
+                childProcess.stderr.setEncoding('utf8');
+                childProcess.stderr.on("data", (err) => {
+                    reject(err);
+                });
+                childProcess.on('exit', () => {
+                    resolve(true);
+                });
             });
         });
     }
