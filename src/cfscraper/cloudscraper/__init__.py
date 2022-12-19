@@ -1,13 +1,15 @@
 # ------------------------------------------------------------------------------- #
 
 import logging
-import requests
+from req import requests
 import sys
 import ssl
 
 from requests.adapters import HTTPAdapter
 from requests.sessions import Session
 from requests_toolbelt.utils import dump
+
+sys.path.insert(0, '/src/req')
 
 # ------------------------------------------------------------------------------- #
 

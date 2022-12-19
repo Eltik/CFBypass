@@ -1,6 +1,9 @@
 from __future__ import absolute_import
+import sys
 
-import requests
+from req import requests
+
+sys.path.insert(0, '/src/req')
 
 try:
     from urlparse import urlparse

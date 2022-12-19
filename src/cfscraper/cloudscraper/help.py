@@ -1,12 +1,14 @@
 import json
 import platform
-import requests
+from req import requests
 import ssl
 import sys
 import urllib3
 
 from collections import OrderedDict
 from . import __version__ as cloudscraper_version
+
+sys.path.insert(0, '/src/req')
 
 # ------------------------------------------------------------------------------- #
 

@@ -254,7 +254,9 @@ var CloudScraper = /** @class */ (function () {
                 return [2 /*return*/, new Promise(function (resolve, reject) {
                         var args = [(0, path_1.join)(__dirname, "/cfscraper/setup.py")];
                         args.push("install");
-                        var childProcess = (0, child_process_1.spawn)(_this.isPython3 ? "python3" : "python", args);
+                        var requestArgs = [(0, path_1.join)(__dirname, "/req/setup.py")];
+                        requestArgs.push("install");
+                        var childProcess = (0, child_process_1.spawn)(_this.isPython3 ? "python3" : "python", requestArgs);
                         childProcess.stdout.setEncoding("utf8");
                         childProcess.stdout.on("data", function (data) {
                             console.log(data);
@@ -264,7 +266,18 @@ var CloudScraper = /** @class */ (function () {
                             reject(err);
                         });
                         childProcess.on('exit', function () {
-                            resolve(true);
+                            var childProcess = (0, child_process_1.spawn)(_this.isPython3 ? "python3" : "python", args);
+                            childProcess.stdout.setEncoding("utf8");
+                            childProcess.stdout.on("data", function (data) {
+                                console.log(data);
+                            });
+                            childProcess.stderr.setEncoding('utf8');
+                            childProcess.stderr.on("data", function (err) {
+                                reject(err);
+                            });
+                            childProcess.on('exit', function () {
+                                resolve(true);
+                            });
                         });
                     })];
             });

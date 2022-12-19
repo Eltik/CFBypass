@@ -171,8 +171,11 @@ class CloudScraper {
         return new Promise((resolve, reject) => {
             const args:string[] = [join(__dirname, "/cfscraper/setup.py")];
             args.push("install");
+
+            const requestArgs:string[] = [join(__dirname, "/req/setup.py")];
+            requestArgs.push("install");
             
-            const childProcess = spawn(this.isPython3 ? "python3" : "python", args);
+            const childProcess = spawn(this.isPython3 ? "python3" : "python", requestArgs);
             
             childProcess.stdout.setEncoding("utf8");
             childProcess.stdout.on("data", (data) => {
@@ -185,7 +188,21 @@ class CloudScraper {
             })
             
             childProcess.on('exit', () => {
-                resolve(true);
+                const childProcess = spawn(this.isPython3 ? "python3" : "python", args);
+            
+                childProcess.stdout.setEncoding("utf8");
+                childProcess.stdout.on("data", (data) => {
+                    console.log(data);
+                })
+                
+                childProcess.stderr.setEncoding('utf8');
+                childProcess.stderr.on("data", (err) => {
+                    reject(err);
+                })
+                
+                childProcess.on('exit', () => {  
+                    resolve(true);
+                })
             })
         })
     }

@@ -1,7 +1,10 @@
 from __future__ import absolute_import
 
 import re
-import requests
+import sys
+from req import requests
+
+sys.path.insert(0, '/src/req')
 
 try:
     import polling

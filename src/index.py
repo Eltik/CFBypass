@@ -1,4 +1,5 @@
 from cfscraper import cloudscraper
+
 import argparse
 import json
 import sys

@@ -1,6 +1,10 @@
 from __future__ import absolute_import
 
-import requests
+from req import requests
+import sys
+
+sys.path.insert(0, '/src/req')
+
 try:
     from urlparse import urlparse
 except ImportError:
