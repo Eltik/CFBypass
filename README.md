@@ -142,3 +142,26 @@ cf.solveCaptcha3("https://4anime.gg/baka-test-summon-the-beasts-2-840", "6LcJeB8
 })
 ```
 The parameters required are the URL of the site (to add a referer) and a anchor for templating. The anchor link can be fetched from the network tab upon visiting the site. Please note that this feature <b>is mainly for advanced usage</b> if captcha bypassing is necessary.
+
+## Known Errors
+### urllib3 error:
+```
+error: `from cfscraper import cloudscraper   File "/Users/eltik/Documents/Coding/CFBypass/src/cfscraper/cloudscraper/__init__.py", line 8, in <module>     from requests.adapters import HTTPAdapter   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/requests-2.28.1-py3.10.egg/requests/__init__.py", line 44, in <module>     from url import urllib3 ModuleNotFoundError: No module named 'url'`
+```
+There is a bug where sometimes Python won't recognize `urllib3`. This seems to mainly cause an issue on macOS. To solve it, find the Python path for your machine. This might be something like this:
+```
+/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/
+```
+Enter the `site-packages` directory, then finally the `requests` directory. The full path is something like this:
+```
+/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/requests-2.28.1-py3.10.egg/requests/__init__.py
+```
+The file will contain something like:
+```python
+from url import urllib3
+```
+Change that to:
+```python
+import urllib3
+```
+If there are any further issues, please open an issue on [GitHub](https://github.com/Eltik/CFBypass/issues).
