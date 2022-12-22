@@ -148,6 +148,19 @@ cf.solveCaptcha3("https://4anime.gg/baka-test-summon-the-beasts-2-840", "6LcJeB8
 The parameters required are the URL of the site (to add a referer) and a anchor for templating. The anchor link can be fetched from the network tab upon visiting the site. Please note that this feature <b>is mainly for advanced usage</b> if captcha bypassing is necessary.
 
 ## Known Errors
+### Cannot find `x` module
+Run the following:
+```
+npm install 
+pip install urllib3 
+pip install chardet 
+pip install idna 
+pip install certifi 
+pip install requests 
+pip install requests_toolbelt 
+```
+You might have to change `pip` to `pip3` depending on your Python version. Credit to [@riimuru](https://github.com/riimuru) for the solution.
+
 ### urllib3 error:
 ```
 error: `from cfscraper import cloudscraper   File "/Users/eltik/Documents/Coding/CFBypass/src/cfscraper/cloudscraper/__init__.py", line 8, in <module>     from requests.adapters import HTTPAdapter   File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/requests-2.28.1-py3.10.egg/requests/__init__.py", line 44, in <module>     from url import urllib3 ModuleNotFoundError: No module named 'url'`
