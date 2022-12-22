@@ -4,6 +4,8 @@ import { decode } from "js-base64";
 import { load } from "cheerio";
 
 class CloudScraper {
+    private url:string;
+    private options:Options;
     private isPython3:boolean;
 
     // If you are using Python 3, set this to true
@@ -106,6 +108,7 @@ class CloudScraper {
             args.push("--url", url);
 
             let stringedData = "";
+            let requestData:any = "";
 
             if (options.method) {
                 args.push("--method", String(options.method));
@@ -125,6 +128,11 @@ class CloudScraper {
             childProcess.stdout.setEncoding("utf8");
             
             childProcess.stdout.on("data", (data) => {
+                if (data.includes("~~~~~~~REQUEST_DATA~~~~~~~")) {
+                    requestData = String(data).split("~~~~~~~REQUEST_DATA~~~~~~~")[1].split("b'")[1].split("'")[0];
+
+                    data = String(data).split("~~~~~~~REQUEST_DATA~~~~~~~")[0];
+                }
                 data = String(data);
                 stringedData += data;
             })
@@ -142,20 +150,30 @@ class CloudScraper {
                 let data = decode(stringedData.substring(2).substring(0, stringedData.length - 1));
                 let statusCode = 200;
 
-                if (errors.length > 0) {
+                try {
+                    requestData = JSON.parse(decode(requestData));
+                } catch {
+                    errors.push({
+                        "error": "Could not parse request data of " + requestData
+                    })
+                }
+
+                if (errors.length > 1) {
                     reject({
                         request,
-                        status: 500,
+                        status: requestData.status_code,
                         statusText: "ERROR",
                         error: errors,
+                        url: requestData.url,
                         text: () => data,
                         json: () => JSON.parse(data)
                     })
                 } else {
                     resolve({
                         request,
-                        status: statusCode,
+                        status: requestData.status_code,
                         statusText: "OK",
+                        url: requestData.url,
                         error: errors,
                         raw: () => stringedData,
                         text: () => data,
@@ -287,6 +305,7 @@ interface Response {
     request: Request;
     status: number;
     statusText: string;
+    url: string;
     error: string[];
     raw: ()=>string;
     text: ()=>string;

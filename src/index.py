@@ -26,6 +26,9 @@ try:
         else:
             req = cloudscraper.create_scraper().get(args.url, timeout=3, allow_redirects=args.allow_redirect)
         print(urlsafe_b64encode(req.text.encode("UTF-8")))
+        print(("~~~~~~~REQUEST_DATA~~~~~~~").encode("UTF-8"))
+        res = {"status_code": req.status_code, "url": req.url}
+        print(urlsafe_b64encode(json.dumps(res).encode("UTF-8")))
     elif args.method == "POST":
         json_data = json.loads(args.data)
         req = None
@@ -35,6 +38,9 @@ try:
         else:
             req = cloudscraper.create_scraper().post(args.url, data=json_data, timeout=3, allow_redirects=args.allow_redirect)
         print(urlsafe_b64encode(req.text.encode("UTF-8")))
+        print(("~~~~~~~REQUEST_DATA~~~~~~~").encode("UTF-8"))
+        res = {"status_code": req.status_code, "url": req.url}
+        print(urlsafe_b64encode(json.dumps(res).encode("UTF-8")))
     elif args.method == "COOKIE":
         print(cloudscraper.get_cookie_string(args.url))
     elif args.method == "TOKENS":
@@ -47,5 +53,8 @@ try:
         else:
             req = cloudscraper.create_scraper().get(args.url, timeout=3, allow_redirects=args.allow_redirect)
         print(urlsafe_b64encode(req.text.encode("UTF-8")))
+        print(("~~~~~~~REQUEST_DATA~~~~~~~").encode("UTF-8"))
+        res = {"status_code": req.status_code, "url": req.url}
+        print(urlsafe_b64encode(json.dumps(res).encode("UTF-8")))
 except:
     raise Exception("Could not send data to " + args.url + " with request data " + args.data + ".")

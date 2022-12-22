@@ -193,6 +193,7 @@ var CloudScraper = /** @class */ (function () {
                         var args = [(0, path_1.join)(__dirname, "index.py")];
                         args.push("--url", url);
                         var stringedData = "";
+                        var requestData = "";
                         if (options.method) {
                             args.push("--method", String(options.method));
                         }
@@ -207,6 +208,10 @@ var CloudScraper = /** @class */ (function () {
                         var childProcess = (0, child_process_1.spawn)(_this.isPython3 ? "python3" : "python", args);
                         childProcess.stdout.setEncoding("utf8");
                         childProcess.stdout.on("data", function (data) {
+                            if (data.includes("~~~~~~~REQUEST_DATA~~~~~~~")) {
+                                requestData = String(data).split("~~~~~~~REQUEST_DATA~~~~~~~")[1].split("b'")[1].split("'")[0];
+                                data = String(data).split("~~~~~~~REQUEST_DATA~~~~~~~")[0];
+                            }
                             data = String(data);
                             stringedData += data;
                         });
@@ -221,12 +226,21 @@ var CloudScraper = /** @class */ (function () {
                         childProcess.on('exit', function () {
                             var data = (0, js_base64_1.decode)(stringedData.substring(2).substring(0, stringedData.length - 1));
                             var statusCode = 200;
-                            if (errors.length > 0) {
+                            try {
+                                requestData = JSON.parse((0, js_base64_1.decode)(requestData));
+                            }
+                            catch (_a) {
+                                errors.push({
+                                    "error": "Could not parse request data of " + requestData
+                                });
+                            }
+                            if (errors.length > 1) {
                                 reject({
                                     request: request,
-                                    status: 500,
+                                    status: requestData.status_code,
                                     statusText: "ERROR",
                                     error: errors,
+                                    url: requestData.url,
                                     text: function () { return data; },
                                     json: function () { return JSON.parse(data); }
                                 });
@@ -234,8 +248,9 @@ var CloudScraper = /** @class */ (function () {
                             else {
                                 resolve({
                                     request: request,
-                                    status: statusCode,
+                                    status: requestData.status_code,
                                     statusText: "OK",
+                                    url: requestData.url,
                                     error: errors,
                                     raw: function () { return stringedData; },
                                     text: function () { return data; },

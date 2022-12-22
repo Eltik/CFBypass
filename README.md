@@ -50,9 +50,10 @@ cf.get("https://google.com/", { method: "GET" }); // Returns a Promise<Response>
 The `GET` and `POST` functions have two required parameters: the `url` parameter and the `options` parameter. The `url` parameter takes a `string` and must be a URL. For example, `https://google.com/` or `https://github.com/`. The `options` parameter must be a JSON object and meet the `options` type requirements:
 ```typescript
 type Options = {
-    method?: Method | string;
+    method?: Method["GET"] | Method["POST"] | Method["COOKIE"] | Method["TOKENS"];
     headers?: { [key: string]: string };
     body?: string;
+    allowRedirect?: boolean;
 };
 
 type Method = {
@@ -74,7 +75,9 @@ interface Response {
     request: Request;
     status: number;
     statusText: string;
+    url: string;
     error: string[];
+    raw: ()=>string;
     text: ()=>string;
     json: ()=>string;
 };
@@ -108,6 +111,7 @@ cf.request('https://myapi.com/utils/', { method: "POST", headers: { Referer: "ht
     // status: 500,
     // statusText: "ERROR",
     // error: errors,
+    // url: url,
     // text: () => data,
     // json: () => JSON.parse(data)
     //
