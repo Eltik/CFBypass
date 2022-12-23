@@ -252,6 +252,7 @@ var CloudScraper = /** @class */ (function () {
                                     url: requestData.url,
                                     error: errors,
                                     headers: requestData.headers,
+                                    cookies: requestData.cookies,
                                     raw: function () { return stringedData; },
                                     text: function () { return data; },
                                     json: function () { return JSON.parse(data); }

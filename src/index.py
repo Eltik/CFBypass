@@ -27,14 +27,25 @@ try:
             req = cloudscraper.create_scraper().get(args.url, timeout=3, allow_redirects=args.allow_redirect)
         print(urlsafe_b64encode(req.text.encode("UTF-8")))
         print(("~~~~~~~REQUEST_DATA~~~~~~~").encode("UTF-8"))
-
         jsonHeader = "{"
+        jsonCookie = ""
 
         for header in req.headers:
+            if req.headers[header].__contains__("[") or req.headers[header].__contains__("{") or req.headers[header].__contains__("}") or req.headers[header].__contains__("]") or req.headers[header].__contains__("\""):
+                continue
             jsonHeader += " \"" + header + "\": \"" + req.headers[header] + "\","
-        jsonHeader = jsonHeader[:-1] + "}"
+        if len(req.headers) > 0:
+            jsonHeader = jsonHeader[:-1] + "}"
+        else:
+            jsonHeader += "}"
 
-        res = {"status_code": req.status_code, "url": req.url, "headers": json.loads(jsonHeader)}
+        for cookie in req.cookies.get_dict():
+            jsonCookie += cookie + "=" + req.cookies.get_dict()[cookie] + ";"
+        
+        if jsonCookie == "":
+            jsonCookie = "No cookies"
+
+        res = {"status_code": req.status_code, "url": req.url, "headers": json.loads(jsonHeader), "cookies": jsonCookie}
         print(urlsafe_b64encode(json.dumps(res).encode("UTF-8")))
     elif args.method == "POST":
         json_data = json.loads(args.data)
@@ -47,12 +58,24 @@ try:
         print(urlsafe_b64encode(req.text.encode("UTF-8")))
         print(("~~~~~~~REQUEST_DATA~~~~~~~").encode("UTF-8"))
         jsonHeader = "{"
+        jsonCookie = ""
 
         for header in req.headers:
+            if req.headers[header].__contains__("[") or req.headers[header].__contains__("{") or req.headers[header].__contains__("}") or req.headers[header].__contains__("]") or req.headers[header].__contains__("\""):
+                continue
             jsonHeader += " \"" + header + "\": \"" + req.headers[header] + "\","
-        jsonHeader = jsonHeader[:-1] + "}"
+        if len(req.headers) > 0:
+            jsonHeader = jsonHeader[:-1] + "}"
+        else:
+            jsonHeader += "}"
 
-        res = {"status_code": req.status_code, "url": req.url, "headers": json.loads(jsonHeader)}
+        for cookie in req.cookies.get_dict():
+            jsonCookie += cookie + "=" + req.cookies.get_dict()[cookie] + ";"
+        
+        if jsonCookie == "":
+            jsonCookie = "No cookies"
+
+        res = {"status_code": req.status_code, "url": req.url, "headers": json.loads(jsonHeader), "cookies": jsonCookie}
         print(urlsafe_b64encode(json.dumps(res).encode("UTF-8")))
     elif args.method == "COOKIE":
         print(cloudscraper.get_cookie_string(args.url))
@@ -68,12 +91,24 @@ try:
         print(urlsafe_b64encode(req.text.encode("UTF-8")))
         print(("~~~~~~~REQUEST_DATA~~~~~~~").encode("UTF-8"))
         jsonHeader = "{"
+        jsonCookie = ""
 
         for header in req.headers:
+            if req.headers[header].__contains__("[") or req.headers[header].__contains__("{") or req.headers[header].__contains__("}") or req.headers[header].__contains__("]") or req.headers[header].__contains__("\""):
+                continue
             jsonHeader += " \"" + header + "\": \"" + req.headers[header] + "\","
-        jsonHeader = jsonHeader[:-1] + "}"
+        if len(req.headers) > 0:
+            jsonHeader = jsonHeader[:-1] + "}"
+        else:
+            jsonHeader += "}"
 
-        res = {"status_code": req.status_code, "url": req.url, "headers": json.loads(jsonHeader)}
+        for cookie in req.cookies.get_dict():
+            jsonCookie += cookie + "=" + req.cookies.get_dict()[cookie] + ";"
+        
+        if jsonCookie == "":
+            jsonCookie = "No cookies"
+
+        res = {"status_code": req.status_code, "url": req.url, "headers": json.loads(jsonHeader), "cookies": jsonCookie}
         print(urlsafe_b64encode(json.dumps(res).encode("UTF-8")))
 except:
     raise Exception("Could not send data to " + args.url + " with request data " + args.data + ".")

@@ -175,6 +175,7 @@ class CloudScraper {
                         url: requestData.url,
                         error: errors,
                         headers: requestData.headers,
+                        cookies: requestData.cookies,
                         raw: () => stringedData,
                         text: () => data,
                         json: () => JSON.parse(data)
@@ -308,6 +309,7 @@ interface Response {
     url: string;
     error: string[];
     headers: { [key: string]: string };
+    cookies: { [key: string]: string };
     raw: ()=>string;
     text: ()=>string;
     json: ()=>string;
