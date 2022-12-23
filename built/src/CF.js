@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const child_process_1 = require("child_process");
 const path_1 = require("path");
 const js_base64_1 = require("js-base64");
+const cheerio_1 = require("cheerio");
 class CloudScraper {
     // If you are using Python 3, set this to true
     constructor(isPython3) {
@@ -13,6 +14,9 @@ class CloudScraper {
         this.tokens = this.tokens.bind(this);
         this.request = this.request.bind(this);
         this.install = this.install.bind(this);
+        this.setPython3 = this.setPython3.bind(this);
+        this.solveCaptcha3 = this.solveCaptcha3.bind(this);
+        this.solveCaptcha3FromHTML = this.solveCaptcha3FromHTML.bind(this);
     }
     // @param url: string options: Options = {}
     async get(url, options = {}) {
@@ -86,6 +90,7 @@ class CloudScraper {
             const args = [(0, path_1.join)(__dirname, "index.py")];
             args.push("--url", url);
             let stringedData = "";
+            let requestData = "";
             if (options.method) {
                 args.push("--method", String(options.method));
             }
@@ -100,6 +105,10 @@ class CloudScraper {
             const childProcess = (0, child_process_1.spawn)(this.isPython3 ? "python3" : "python", args);
             childProcess.stdout.setEncoding("utf8");
             childProcess.stdout.on("data", (data) => {
+                if (data.includes("~~~~~~~REQUEST_DATA~~~~~~~")) {
+                    requestData = String(data).split("~~~~~~~REQUEST_DATA~~~~~~~")[1].split("b'")[1].split("'")[0];
+                    data = String(data).split("~~~~~~~REQUEST_DATA~~~~~~~")[0];
+                }
                 data = String(data);
                 stringedData += data;
             });
@@ -113,13 +122,21 @@ class CloudScraper {
             });
             childProcess.on('exit', () => {
                 let data = (0, js_base64_1.decode)(stringedData.substring(2).substring(0, stringedData.length - 1));
-                let statusCode = 200;
-                if (errors.length > 0) {
+                try {
+                    requestData = JSON.parse((0, js_base64_1.decode)(requestData));
+                }
+                catch {
+                    errors.push({
+                        "error": "Could not parse request data of " + requestData
+                    });
+                }
+                if (errors.length > 1) {
                     reject({
                         request,
-                        status: 500,
+                        status: requestData.status_code,
                         statusText: "ERROR",
                         error: errors,
+                        url: requestData.url,
                         text: () => data,
                         json: () => JSON.parse(data)
                     });
@@ -127,9 +144,12 @@ class CloudScraper {
                 else {
                     resolve({
                         request,
-                        status: statusCode,
+                        status: requestData.status_code,
                         statusText: "OK",
+                        url: requestData.url,
                         error: errors,
+                        headers: requestData.headers,
+                        cookies: requestData.cookies,
                         raw: () => stringedData,
                         text: () => data,
                         json: () => JSON.parse(data)
@@ -137,6 +157,44 @@ class CloudScraper {
                 }
             });
         });
+    }
+    // @param token: string
+    async solveCaptcha3(url, key, anchorLink) {
+        const uri = new URL(url);
+        const domain = uri.protocol + '//' + uri.host;
+        const keyReq = await this.get(`https://www.google.com/recaptcha/api.js?render=${key}`, {
+            headers: {
+                Referer: domain,
+            },
+        });
+        const data = keyReq.text();
+        const v = data.substring(data.indexOf('/releases/'), data.lastIndexOf('/recaptcha')).split('/releases/')[1];
+        // ANCHOR IS SPECIFIC TO SITE
+        const curK = anchorLink.split('k=')[1].split('&')[0];
+        const curV = anchorLink.split("v=")[1].split("&")[0];
+        const anchor = anchorLink.replace(curK, key).replace(curV, v);
+        const req = await this.get(anchor);
+        const $ = (0, cheerio_1.load)(req.text());
+        const reCaptchaToken = $('input[id="recaptcha-token"]').attr('value');
+        if (!reCaptchaToken)
+            throw new Error('reCaptcha token not found');
+        return reCaptchaToken;
+    }
+    async solveCaptcha3FromHTML(url, html, anchorLink) {
+        const $ = (0, cheerio_1.load)(html);
+        let captcha = null;
+        $("script").map((index, element) => {
+            if ($(element).attr("src") != undefined && $(element).attr("src").includes("/recaptcha/")) {
+                captcha = $(element).attr("src");
+            }
+        });
+        if (!captcha) {
+            throw new Error("Couldn't fetch captcha.");
+        }
+        let captchaURI = new URL(captcha);
+        const captchaId = captchaURI.searchParams.get("render");
+        const captchaKey = await this.solveCaptcha3(url, captchaId, anchorLink);
+        return captchaKey;
     }
     // @param isPython3: boolean
     setPython3(isPython3) {

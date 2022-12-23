@@ -77,6 +77,8 @@ interface Response {
     statusText: string;
     url: string;
     error: string[];
+    headers: { [key: string]: string };
+    cookies: { [key: string]: string };
     raw: ()=>string;
     text: ()=>string;
     json: ()=>string;
