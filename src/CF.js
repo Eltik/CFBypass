@@ -47,36 +47,38 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var child_process_1 = require("child_process");
-var path_1 = require("path");
-var js_base64_1 = require("js-base64");
 var cheerio_1 = require("cheerio");
+var promise_request_1 = require("./promise-request/promise-request");
 var CloudScraper = /** @class */ (function () {
     // If you are using Python 3, set this to true
-    function CloudScraper(isPython3) {
-        this.isPython3 = isPython3 !== null && isPython3 !== void 0 ? isPython3 : false;
+    function CloudScraper(url, options) {
+        this.url = url ? url : "";
+        this.options = options ? options : {};
         this.get = this.get.bind(this);
         this.post = this.post.bind(this);
         this.cookie = this.cookie.bind(this);
         this.tokens = this.tokens.bind(this);
         this.request = this.request.bind(this);
-        this.install = this.install.bind(this);
-        this.setPython3 = this.setPython3.bind(this);
         this.solveCaptcha3 = this.solveCaptcha3.bind(this);
         this.solveCaptcha3FromHTML = this.solveCaptcha3FromHTML.bind(this);
     }
     // @param url: string options: Options = {}
     CloudScraper.prototype.get = function (url, options) {
-        if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
             var request, response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        options = __assign(__assign({}, options), { method: "GET" });
+                        if (url) {
+                            this.url = url;
+                        }
+                        if (options) {
+                            this.options = options;
+                        }
+                        this.options = __assign(__assign({}, this.options), { method: "GET" });
                         request = {
-                            url: url,
-                            options: options
+                            url: this.url,
+                            options: this.options
                         };
                         return [4 /*yield*/, this.request(request)];
                     case 1:
@@ -88,16 +90,21 @@ var CloudScraper = /** @class */ (function () {
     };
     // @param url: string options: Options = {}
     CloudScraper.prototype.post = function (url, options) {
-        if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
             var request, response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        options = __assign(__assign({}, options), { method: "POST" });
+                        if (url) {
+                            this.url = url;
+                        }
+                        if (options) {
+                            this.options = options;
+                        }
+                        this.options = __assign(__assign({}, this.options), { method: "GET" });
                         request = {
-                            url: url,
-                            options: options
+                            url: this.url,
+                            options: this.options
                         };
                         return [4 /*yield*/, this.request(request)];
                     case 1:
@@ -109,16 +116,21 @@ var CloudScraper = /** @class */ (function () {
     };
     // @param url: string options: Options = {}
     CloudScraper.prototype.cookie = function (url, options) {
-        if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
             var request, response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        options = __assign(__assign({}, options), { method: "COOKIE" });
+                        if (url) {
+                            this.url = url;
+                        }
+                        if (options) {
+                            this.options = options;
+                        }
+                        this.options = __assign(__assign({}, this.options), { method: "GET" });
                         request = {
-                            url: url,
-                            options: options
+                            url: this.url,
+                            options: this.options
                         };
                         return [4 /*yield*/, this.request(request)];
                     case 1:
@@ -150,7 +162,6 @@ var CloudScraper = /** @class */ (function () {
         });
     };
     CloudScraper.prototype.put = function (url, options) {
-        if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 throw new Error("PUT is not supported yet! Development is in progress.");
@@ -158,7 +169,6 @@ var CloudScraper = /** @class */ (function () {
         });
     };
     CloudScraper.prototype["delete"] = function (url, options) {
-        if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 throw new Error("DELETE is not supported! Development is in progress.");
@@ -166,7 +176,6 @@ var CloudScraper = /** @class */ (function () {
         });
     };
     CloudScraper.prototype.patch = function (url, options) {
-        if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 throw new Error("PUT is not supported! Development is in progress.");
@@ -174,7 +183,6 @@ var CloudScraper = /** @class */ (function () {
         });
     };
     CloudScraper.prototype.head = function (url, options) {
-        if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 throw new Error("PUT is not supported! Development is in progress.");
@@ -189,87 +197,64 @@ var CloudScraper = /** @class */ (function () {
             return __generator(this, function (_a) {
                 url = request.url;
                 options = request.options;
-                return [2 /*return*/, new Promise(function (resolve, reject) {
-                        var args = [(0, path_1.join)(__dirname, "index.py")];
-                        args.push("--url", url);
-                        var stringedData = "";
-                        var requestData = "";
-                        if (options.method) {
-                            args.push("--method", String(options.method));
-                        }
-                        if (options.headers) {
-                            args.push("--headers", JSON.stringify(options.headers));
-                        }
-                        if (options.body) {
-                            args.push("--data", JSON.stringify(options.body));
-                        }
-                        args.push("--allow-redirect", options.allowRedirect ? "True" : "False");
-                        var errors = [];
-                        var childProcess = (0, child_process_1.spawn)(_this.isPython3 ? "python3" : "python", args);
-                        childProcess.stdout.setEncoding("utf8");
-                        childProcess.stdout.on("data", function (data) {
-                            if (data.includes("~~~~~~~REQUEST_DATA~~~~~~~")) {
-                                requestData = String(data).split("~~~~~~~REQUEST_DATA~~~~~~~")[1].split("b'")[1].split("'")[0];
-                                data = String(data).split("~~~~~~~REQUEST_DATA~~~~~~~")[0];
-                            }
-                            data = String(data);
-                            stringedData += data;
-                        });
-                        childProcess.stderr.setEncoding('utf8');
-                        childProcess.stderr.on("data", function (err) {
-                            err = String(err).trim();
-                            err = err.replaceAll("\n", " ");
-                            errors.push({
-                                "error": String(err).trim()
-                            });
-                        });
-                        childProcess.on('exit', function () {
-                            var data = (0, js_base64_1.decode)(stringedData.substring(2).substring(0, stringedData.length - 1));
-                            var statusCode = 200;
-                            try {
-                                requestData = JSON.parse((0, js_base64_1.decode)(requestData));
-                            }
-                            catch (_a) {
-                                errors.push({
-                                    "error": "Could not parse request data of " + requestData
-                                });
-                            }
-                            if (errors.length > 1) {
-                                reject({
-                                    request: request,
-                                    status: requestData.status_code,
-                                    statusText: "ERROR",
-                                    error: errors,
-                                    url: requestData.url,
-                                    text: function () { return data; },
-                                    json: function () { return JSON.parse(data); }
-                                });
-                            }
-                            else {
-                                resolve({
-                                    request: request,
-                                    status: requestData.status_code,
-                                    statusText: "OK",
-                                    url: requestData.url,
-                                    error: errors,
-                                    raw: function () { return stringedData; },
-                                    text: function () { return data; },
-                                    json: function () { return JSON.parse(data); }
-                                });
+                if (!request.options.method) {
+                    options.method = "GET";
+                }
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var req, init, html, $, challengeForm, isIUAMChallenge, isIUAMChallengeForm, isNewIUAMChallenge, isNewIUAMChallengeCaptcha, referer, postRequest, postResponse;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    req = new promise_request_1["default"](url, options);
+                                    return [4 /*yield*/, req.request()];
+                                case 1:
+                                    init = _a.sent();
+                                    html = init.text();
+                                    $ = (0, cheerio_1.load)(html);
+                                    challengeForm = $("form#challenge-form").attr("action");
+                                    isIUAMChallenge = /\/cdn-cgi\/images\/trace\/jsch\//g;
+                                    isIUAMChallengeForm = /<form .*?="challenge-form" action="\/\S+__cf_chl_f_tk=/g;
+                                    isNewIUAMChallenge = /cpo.src\s*=\s*['"]\/cdn-cgi\/challenge-platform\/\S+orchestrate\/jsch\/v1/g;
+                                    isNewIUAMChallengeCaptcha = /cpo.src\s*=\s*['"]\/cdn-cgi\/challenge-platform\/\S+\/orchestrate\/captcha\/v1\?ray=/g;
+                                    if (!((isIUAMChallenge.test(html) || isIUAMChallengeForm.test(html)) && (isNewIUAMChallenge.test(html) || isNewIUAMChallengeCaptcha.test(html)))) return [3 /*break*/, 3];
+                                    referer = new URL(init.url).protocol + '//' + new URL(init.url).host + challengeForm;
+                                    postRequest = new promise_request_1["default"](referer, {
+                                        body: JSON.stringify({
+                                            md: $("input[name='md']").val(),
+                                            r: $("input[name='r']").val()
+                                        }),
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/x-www-form-urlencoded",
+                                            "Referer": url
+                                        }
+                                    });
+                                    return [4 /*yield*/, postRequest.request()];
+                                case 2:
+                                    postResponse = _a.sent();
+                                    resolve(postResponse);
+                                    return [3 /*break*/, 4];
+                                case 3:
+                                    resolve(init);
+                                    _a.label = 4;
+                                case 4: return [2 /*return*/];
                             }
                         });
-                    })];
+                    }); })];
             });
         });
     };
     // @param token: string
-    CloudScraper.prototype.solveCaptcha3 = function (url, key, anchorLink) {
+    CloudScraper.prototype.solveCaptcha3 = function (key, anchorLink, url) {
         return __awaiter(this, void 0, void 0, function () {
             var uri, domain, keyReq, data, v, curK, curV, anchor, req, $, reCaptchaToken;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        uri = new URL(url);
+                        if (url) {
+                            this.url = url;
+                        }
+                        uri = new URL(this.url);
                         domain = uri.protocol + '//' + uri.host;
                         return [4 /*yield*/, this.get("https://www.google.com/recaptcha/api.js?render=".concat(key), {
                                 headers: {
@@ -295,12 +280,15 @@ var CloudScraper = /** @class */ (function () {
             });
         });
     };
-    CloudScraper.prototype.solveCaptcha3FromHTML = function (url, html, anchorLink) {
+    CloudScraper.prototype.solveCaptcha3FromHTML = function (html, anchorLink, url) {
         return __awaiter(this, void 0, void 0, function () {
             var $, captcha, captchaURI, captchaId, captchaKey;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (url) {
+                            this.url = url;
+                        }
                         $ = (0, cheerio_1.load)(html);
                         captcha = null;
                         $("script").map(function (index, element) {
@@ -313,7 +301,7 @@ var CloudScraper = /** @class */ (function () {
                         }
                         captchaURI = new URL(captcha);
                         captchaId = captchaURI.searchParams.get("render");
-                        return [4 /*yield*/, this.solveCaptcha3(url, captchaId, anchorLink)];
+                        return [4 /*yield*/, this.solveCaptcha3(captchaId, anchorLink, this.url)];
                     case 1:
                         captchaKey = _a.sent();
                         return [2 /*return*/, captchaKey];
@@ -321,44 +309,10 @@ var CloudScraper = /** @class */ (function () {
             });
         });
     };
-    // @param isPython3: boolean
-    CloudScraper.prototype.setPython3 = function (isPython3) {
-        this.isPython3 = isPython3;
-    };
-    // @param isPython3: boolean
-    CloudScraper.prototype.install = function () {
+    CloudScraper.prototype.solveHCaptcha = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
             return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve, reject) {
-                        var args = [(0, path_1.join)(__dirname, "/cfscraper/setup.py")];
-                        args.push("install");
-                        var requestArgs = [(0, path_1.join)(__dirname, "/req/setup.py")];
-                        requestArgs.push("install");
-                        var childProcess = (0, child_process_1.spawn)(_this.isPython3 ? "python3" : "python", requestArgs);
-                        childProcess.stdout.setEncoding("utf8");
-                        childProcess.stdout.on("data", function (data) {
-                            console.log(data);
-                        });
-                        childProcess.stderr.setEncoding('utf8');
-                        childProcess.stderr.on("data", function (err) {
-                            reject(err);
-                        });
-                        childProcess.on('exit', function () {
-                            var childProcess = (0, child_process_1.spawn)(_this.isPython3 ? "python3" : "python", args);
-                            childProcess.stdout.setEncoding("utf8");
-                            childProcess.stdout.on("data", function (data) {
-                                console.log(data);
-                            });
-                            childProcess.stderr.setEncoding('utf8');
-                            childProcess.stderr.on("data", function (err) {
-                                reject(err);
-                            });
-                            childProcess.on('exit', function () {
-                                resolve(true);
-                            });
-                        });
-                    })];
+                throw new Error("HCaptcha is not supported! Development is in progress.");
             });
         });
     };

@@ -1,67 +1,82 @@
-import { spawn } from "child_process";
-import { join } from "path";
-import { decode } from "js-base64";
 import { load } from "cheerio";
+import PromiseRequest from "./promise-request/promise-request";
+import { decode } from "js-base64";
 
 class CloudScraper {
     private url:string;
     private options:Options;
-    private isPython3:boolean;
 
     // If you are using Python 3, set this to true
-    constructor(isPython3?:boolean) {
-        this.isPython3 = isPython3 ?? false;
+    constructor(url?:string, options?:Options) {
+        this.url = url ? url : "";
+        this.options = options ? options : {};
         this.get = this.get.bind(this);
         this.post = this.post.bind(this);
         this.cookie = this.cookie.bind(this);
         this.tokens = this.tokens.bind(this);
         this.request = this.request.bind(this);
-        this.install = this.install.bind(this);
-        this.setPython3 = this.setPython3.bind(this);
         this.solveCaptcha3 = this.solveCaptcha3.bind(this);
         this.solveCaptcha3FromHTML = this.solveCaptcha3FromHTML.bind(this);
     }
 
     // @param url: string options: Options = {}
-    public async get(url: string, options: Options = {}): Promise<Response> {
-        options = {
-            ...options,
+    public async get(url?: string, options?: Options): Promise<Response> {
+        if (url) {
+            this.url = url;
+        }
+        if (options) {
+            this.options = options;
+        }
+        this.options = {
+            ...this.options,
             method: "GET"
         };
         
         const request:Request = {
-            url,
-            options
+            url: this.url,
+            options: this.options
         };
         const response = await this.request(request);
         return response;
     }
 
     // @param url: string options: Options = {}
-    public async post(url: string, options: Options = {}): Promise<Response> {
-        options = {
-            ...options,
-            method: "POST"
-        };
-
-        const request:Request = {
-            url,
-            options
-        };
-        const response = await this.request(request);
-        return response;
-    }
-
-    // @param url: string options: Options = {}
-    public async cookie(url: string, options: Options = {}): Promise<Response> {
-        options = {
-            ...options,
-            method: "COOKIE"
+    public async post(url?: string, options?: Options): Promise<Response> {
+        if (url) {
+            this.url = url;
+        }
+        if (options) {
+            this.options = options;
+        }
+        this.options = {
+            ...this.options,
+            method: "GET"
         };
         
         const request:Request = {
-            url,
-            options
+            url: this.url,
+            options: this.options
+        };
+        const response = await this.request(request);
+        return response;
+    }
+
+    // @param url: string options: Options = {}
+    public async cookie(url?: string, options?: Options): Promise<Response> {
+        if (url) {
+            this.url = url;
+        }
+        if (options) {
+            this.options = options;
+        }
+        this.options = {
+            ...this.options,
+            method: "GET"
+        };
+        
+        const request:Request = {
+            url: this.url,
+            options: this.options
         };
         const response = await this.request(request);
         return response;
@@ -82,19 +97,19 @@ class CloudScraper {
         return response;
     }
 
-    public async put(url: string, options: Options = {}): Promise<Response> {
+    public async put(url?: string, options?: Options): Promise<Response> {
         throw new Error("PUT is not supported yet! Development is in progress.");
     }
 
-    public async delete(url: string, options: Options = {}): Promise<Response> {
+    public async delete(url?: string, options?: Options): Promise<Response> {
         throw new Error("DELETE is not supported! Development is in progress.");
     }
     
-    public async patch(url: string, options: Options = {}): Promise<Response> {
+    public async patch(url?: string, options?: Options): Promise<Response> {
         throw new Error("PUT is not supported! Development is in progress.");
     }
 
-    public async head(url: string, options: Options = {}): Promise<Response> {
+    public async head(url?: string, options?: Options): Promise<Response> {
         throw new Error("PUT is not supported! Development is in progress.");
     }
 
@@ -102,91 +117,85 @@ class CloudScraper {
     public async request(request:Request): Promise<Response> {
         const url = request.url;
         const options = request.options;
+        if (!request.options.method) {
+            options.method = "GET";
+        }
 
-        return new Promise((resolve, reject) => {
-            const args:string[] = [join(__dirname, "index.py")];
-            args.push("--url", url);
+        return new Promise(async(resolve, reject) => {
+            const req = new PromiseRequest(url, options);
+            const init = await req.request();
+            const html = init.text();
+            const $ = load(html);
+            const challengeForm = $("form#challenge-form").attr("action");
 
-            let stringedData = "";
-            let requestData:any = "";
-
-            if (options.method) {
-                args.push("--method", String(options.method));
+            /*
+            let cfOptions = html.includes("window._cf_chl_opt={") ? html.split("window._cf_chl_opt={")[1].split("};")[0] : html.split(" = {")[1].split("};")[0];
+            cfOptions = cfOptions.replace(/'/g, '"');
+            console.log(cfOptions);
+            let data = {
+                ...JSON.parse(cfOptions),
             }
-            if (options.headers) {
-                args.push("--headers", JSON.stringify(options.headers));
+            //console.log(data);
+            */
+
+            const isIUAMChallenge = /\/cdn-cgi\/images\/trace\/jsch\//g;
+            const isIUAMChallengeForm = /<form .*?="challenge-form" action="\/\S+__cf_chl_f_tk=/g;
+            const isNewIUAMChallenge = /cpo.src\s*=\s*['"]\/cdn-cgi\/challenge-platform\/\S+orchestrate\/jsch\/v1/g;
+            const isNewIUAMChallengeCaptcha = /cpo.src\s*=\s*['"]\/cdn-cgi\/challenge-platform\/\S+\/orchestrate\/captcha\/v1\?ray=/g;
+
+            if ((isIUAMChallenge.test(html) || isIUAMChallengeForm.test(html)) && (isNewIUAMChallenge.test(html) || isNewIUAMChallengeCaptcha.test(html))) {
+                const referer = new URL(init.url).protocol + '//' + new URL(init.url).host + challengeForm;
+                
+                const postRequest = new PromiseRequest(referer, {
+                    body: JSON.stringify({
+                        md: $("input[name='md']").val(),
+                        r: $("input[name='r']").val(),
+                    }),
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Referer": url
+                    },
+                });
+
+                const postResponse = await postRequest.request();
+                resolve(postResponse);
+
+                /*
+                const challengeRegex = html.match(/cpo.src\s*=\s*['"]\/cdn-cgi\/challenge-platform\/\S+\/orchestrate\/captcha\/v1\?ray=(?<form>\S+)/g);
+                const challengeReq = challengeRegex[0].split("'")[1].split("';")[0];
+                const challengeUrl = new URL(challengeReq, init.url).href;
+                const req2 = new PromiseRequest(challengeUrl, {
+                    headers: {
+                        Referer: referer
+                    }
+                });
+                const challenge = await req2.request();
+                const cfBm = challenge.headers["set-cookie"][0].split(";")[0].split("=")[1];
+                const cfRay = challenge.headers["cf-ray"];
+
+                this.options.headers = {
+                    ...this.options.headers,
+                    "cookie": `__cf_bm=${cfBm}; __cfruid=${cfRay}`
+                };
+
+                const cookieRequest = new PromiseRequest(url, this.options);
+                const req3 = await cookieRequest.request();
+
+                resolve(req3);
+                */
+            } else {
+                resolve(init);
             }
-            if (options.body) {
-                args.push("--data", JSON.stringify(options.body));
-            }
-            args.push("--allow-redirect", options.allowRedirect ? "True" : "False");
-
-            const errors:any[] = [];
-
-            const childProcess = spawn(this.isPython3 ? "python3" : "python", args);
-            
-            childProcess.stdout.setEncoding("utf8");
-            
-            childProcess.stdout.on("data", (data) => {
-                if (data.includes("~~~~~~~REQUEST_DATA~~~~~~~")) {
-                    requestData = String(data).split("~~~~~~~REQUEST_DATA~~~~~~~")[1].split("b'")[1].split("'")[0];
-
-                    data = String(data).split("~~~~~~~REQUEST_DATA~~~~~~~")[0];
-                }
-                data = String(data);
-                stringedData += data;
-            })
-            
-            childProcess.stderr.setEncoding('utf8');
-            childProcess.stderr.on("data", (err) => {
-                err = String(err).trim();
-                err = err.replaceAll("\n", " ");
-                errors.push({
-                    "error": String(err).trim()
-                })
-            })
-            
-            childProcess.on('exit', () => {
-                let data = decode(stringedData.substring(2).substring(0, stringedData.length - 1));
-                let statusCode = 200;
-
-                try {
-                    requestData = JSON.parse(decode(requestData));
-                } catch {
-                    errors.push({
-                        "error": "Could not parse request data of " + requestData
-                    })
-                }
-
-                if (errors.length > 1) {
-                    reject({
-                        request,
-                        status: requestData.status_code,
-                        statusText: "ERROR",
-                        error: errors,
-                        url: requestData.url,
-                        text: () => data,
-                        json: () => JSON.parse(data)
-                    })
-                } else {
-                    resolve({
-                        request,
-                        status: requestData.status_code,
-                        statusText: "OK",
-                        url: requestData.url,
-                        error: errors,
-                        raw: () => stringedData,
-                        text: () => data,
-                        json: () => JSON.parse(data)
-                    });
-                }
-            })
         })
     }
 
     // @param token: string
-    public async solveCaptcha3(url: string, key: string, anchorLink: string): Promise<string> {
-        const uri = new URL(url);
+    public async solveCaptcha3(key: string, anchorLink: string, url?: string): Promise<string> {
+        if (url) {
+            this.url = url;
+        }
+        const uri = new URL(this.url);
         const domain = uri.protocol + '//' + uri.host;
 
         const keyReq = await this.get(`https://www.google.com/recaptcha/api.js?render=${key}`, {
@@ -214,7 +223,10 @@ class CloudScraper {
         return reCaptchaToken;
     }
 
-    public async solveCaptcha3FromHTML(url: string, html: string, anchorLink: string) {
+    public async solveCaptcha3FromHTML(html: string, anchorLink: string, url?: string) {
+        if (url) {
+            this.url = url;
+        }
         const $ = load(html);
 
         let captcha = null;
@@ -228,56 +240,14 @@ class CloudScraper {
             throw new Error("Couldn't fetch captcha.");
         }
 
-        let captchaURI = new URL(captcha);
+        const captchaURI = new URL(captcha);
         const captchaId = captchaURI.searchParams.get("render");
-        const captchaKey = await this.solveCaptcha3(url, captchaId, anchorLink);
+        const captchaKey = await this.solveCaptcha3(captchaId, anchorLink, this.url);
         return captchaKey;
     }
 
-    // @param isPython3: boolean
-    public setPython3(isPython3:boolean) {
-        this.isPython3 = isPython3;
-    }
-
-    // @param isPython3: boolean
-    public async install() {
-        return new Promise((resolve, reject) => {
-            const args:string[] = [join(__dirname, "/cfscraper/setup.py")];
-            args.push("install");
-
-            const requestArgs:string[] = [join(__dirname, "/req/setup.py")];
-            requestArgs.push("install");
-            
-            const childProcess = spawn(this.isPython3 ? "python3" : "python", requestArgs);
-            
-            childProcess.stdout.setEncoding("utf8");
-            childProcess.stdout.on("data", (data) => {
-                console.log(data);
-            })
-            
-            childProcess.stderr.setEncoding('utf8');
-            childProcess.stderr.on("data", (err) => {
-                reject(err);
-            })
-            
-            childProcess.on('exit', () => {
-                const childProcess = spawn(this.isPython3 ? "python3" : "python", args);
-            
-                childProcess.stdout.setEncoding("utf8");
-                childProcess.stdout.on("data", (data) => {
-                    console.log(data);
-                })
-                
-                childProcess.stderr.setEncoding('utf8');
-                childProcess.stderr.on("data", (err) => {
-                    reject(err);
-                })
-                
-                childProcess.on('exit', () => {  
-                    resolve(true);
-                })
-            })
-        })
+    public async solveHCaptcha() {
+        throw new Error("HCaptcha is not supported! Development is in progress.");
     }
 }
 
@@ -286,6 +256,7 @@ type Options = {
     headers?: { [key: string]: string };
     body?: string;
     allowRedirect?: boolean;
+    stream?: boolean;
 };
 
 type Method = {
@@ -307,6 +278,7 @@ interface Response {
     statusText: string;
     url: string;
     error: string[];
+    headers: { [key: string]: string };
     raw: ()=>string;
     text: ()=>string;
     json: ()=>string;
