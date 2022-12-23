@@ -225,7 +225,6 @@ var CloudScraper = /** @class */ (function () {
                         });
                         childProcess.on('exit', function () {
                             var data = (0, js_base64_1.decode)(stringedData.substring(2).substring(0, stringedData.length - 1));
-                            var statusCode = 200;
                             try {
                                 requestData = JSON.parse((0, js_base64_1.decode)(requestData));
                             }
@@ -252,6 +251,7 @@ var CloudScraper = /** @class */ (function () {
                                     statusText: "OK",
                                     url: requestData.url,
                                     error: errors,
+                                    headers: requestData.headers,
                                     raw: function () { return stringedData; },
                                     text: function () { return data; },
                                     json: function () { return JSON.parse(data); }

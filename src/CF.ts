@@ -148,7 +148,6 @@ class CloudScraper {
             
             childProcess.on('exit', () => {
                 let data = decode(stringedData.substring(2).substring(0, stringedData.length - 1));
-                let statusCode = 200;
 
                 try {
                     requestData = JSON.parse(decode(requestData));
@@ -175,6 +174,7 @@ class CloudScraper {
                         statusText: "OK",
                         url: requestData.url,
                         error: errors,
+                        headers: requestData.headers,
                         raw: () => stringedData,
                         text: () => data,
                         json: () => JSON.parse(data)
@@ -307,6 +307,7 @@ interface Response {
     statusText: string;
     url: string;
     error: string[];
+    headers: { [key: string]: string };
     raw: ()=>string;
     text: ()=>string;
     json: ()=>string;
