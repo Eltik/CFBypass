@@ -12,14 +12,21 @@ parser.add_argument('--data')
 parser.add_argument('--headers')
 args = parser.parse_args()
 
+scraper = cloudscraper.create_scraper(
+    browser={
+        'browser': 'chrome',
+        'platform': 'windows',
+        'desktop': True
+    }
+)
 try:
     if args.method == "GET":
         req = None
         if args.headers != None:
             headers = json.loads(args.headers)
-            req = cloudscraper.create_scraper().get(args.url, timeout=3, headers=headers)
+            req = scraper.get(args.url, timeout=3, headers=headers)
         else:
-            req = cloudscraper.create_scraper().get(args.url, timeout=3)
+            req = scraper.get(args.url, timeout=3)
         print(urlsafe_b64encode((req.text.encode("UTF-8"))))
         print("{ statusCode: " + str(req.status_code) + " }")
     elif args.method == "POST":
@@ -27,9 +34,9 @@ try:
         req = None
         if args.headers != None:
             headers = json.loads(args.headers)
-            req = cloudscraper.create_scraper().post(args.url, data=json_data, timeout=3, headers=headers)
+            req = scraper.post(args.url, data=json_data, timeout=3, headers=headers)
         else:
-            req = cloudscraper.create_scraper().post(args.url, data=json_data, timeout=3)
+            req = scraper.post(args.url, data=json_data, timeout=3)
         print(urlsafe_b64encode((req.text.encode("UTF-8"))))
         print("{ statusCode: " + str(req.status_code) + " }")
     elif args.method == "COOKIE":
@@ -40,9 +47,9 @@ try:
         req = None
         if args.headers != None:
             headers = json.loads(args.headers)
-            req = cloudscraper.create_scraper().get(args.url, timeout=3, headers=headers)
+            req = scraper.get(args.url, timeout=3, headers=headers)
         else:
-            req = cloudscraper.create_scraper().get(args.url, timeout=3)
+            req = scraper.get(args.url, timeout=3)
         print(urlsafe_b64encode((req.text.encode("UTF-8"))))
         print("{ statusCode: " + str(req.status_code) + " }")
 except:
