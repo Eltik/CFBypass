@@ -84,73 +84,79 @@ class CloudScraper {
     }
     // @param url: string options: Options = {}
     async request(request) {
-        const url = request.url;
-        const options = request.options;
         return new Promise((resolve, reject) => {
-            const args = [(0, path_1.join)(__dirname, "index.py")];
-            args.push("--url", url);
-            let stringedData = "";
-            let requestData = "";
-            if (options.method) {
-                args.push("--method", String(options.method));
+            const args = [(0, path_1.join)(__dirname, "../index.py")];
+            args.push("--url", request.url);
+            if (request.options.method) {
+                args.push("--method", String(request.options.method));
             }
-            if (options.headers) {
-                args.push("--headers", JSON.stringify(options.headers));
+            if (request.options.headers) {
+                args.push("--headers", JSON.stringify(request.options.headers));
             }
-            if (options.body) {
-                args.push("--data", JSON.stringify(options.body));
+            if (request.options.body) {
+                args.push("--data", JSON.stringify(request.options.body));
             }
-            args.push("--allow-redirect", options.allowRedirect ? "True" : "False");
-            const errors = [];
+            const result = [];
             const childProcess = (0, child_process_1.spawn)(this.isPython3 ? "python3" : "python", args);
             childProcess.stdout.setEncoding("utf8");
             childProcess.stdout.on("data", (data) => {
-                if (data.includes("~~~~~~~REQUEST_DATA~~~~~~~")) {
-                    requestData = String(data).split("~~~~~~~REQUEST_DATA~~~~~~~")[1].split("b'")[1].split("'")[0];
-                    data = String(data).split("~~~~~~~REQUEST_DATA~~~~~~~")[0];
+                // GitHub CoPilot moment
+                if (data.includes("statusCode")) {
+                    let statusCode = data.split("{ statusCode")[1];
+                    statusCode = statusCode.split("}")[0];
+                    statusCode = statusCode.split(":")[1];
+                    statusCode = statusCode.trim();
+                    result.push({
+                        "status": Number(data)
+                    });
+                    result.push({
+                        "data": data.split("{ statusCode")[0]?.trim()
+                    });
                 }
-                data = String(data);
-                stringedData += data;
+                else {
+                    result.push({
+                        "data": data
+                    });
+                }
             });
             childProcess.stderr.setEncoding('utf8');
             childProcess.stderr.on("data", (err) => {
                 err = String(err).trim();
                 err = err.replaceAll("\n", " ");
-                errors.push({
+                result.push({
                     "error": String(err).trim()
                 });
             });
             childProcess.on('exit', () => {
-                let data = (0, js_base64_1.decode)(stringedData.substring(2).substring(0, stringedData.length - 1));
-                try {
-                    requestData = JSON.parse((0, js_base64_1.decode)(requestData));
+                let data = "";
+                let statusCode = 200;
+                const errors = [];
+                for (let i = 0; i < result.length; i++) {
+                    if (result[i].error) {
+                        errors.push(result[i]);
+                    }
+                    else if (result[i].data) {
+                        data += result[i].data;
+                    }
+                    else if (result[i].status) {
+                        statusCode = result[i].status;
+                    }
                 }
-                catch {
-                    errors.push({
-                        "error": "Could not parse request data of " + requestData
-                    });
-                }
-                if (errors.length > 1) {
+                data = (0, js_base64_1.decode)(data.substring(2).substring(0, data.length - 1));
+                if (errors.length > 0) {
                     reject({
-                        request,
-                        status: requestData.status_code,
+                        status: 500,
                         statusText: "ERROR",
                         error: errors,
-                        url: requestData.url,
                         text: () => data,
                         json: () => JSON.parse(data)
                     });
                 }
                 else {
                     resolve({
-                        request,
-                        status: requestData.status_code,
+                        status: statusCode,
                         statusText: "OK",
-                        url: requestData.url,
                         error: errors,
-                        headers: requestData.headers,
-                        cookies: requestData.cookies,
-                        raw: () => stringedData,
                         text: () => data,
                         json: () => JSON.parse(data)
                     });

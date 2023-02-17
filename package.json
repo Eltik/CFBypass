@@ -1,17 +1,18 @@
 {
   "devDependencies": {
     "@types/node": "^18.11.13",
-    "typescript": "^4.9.4"
+    "typescript": "^4.9.4",
+    "ts-node": "^10.9.1"
   },
   "name": "cfbypass",
   "description": "Python based CloudFlare bypass. Utilizes [VeNoMouS's CloudScraper](https://github.com/VeNoMouS/cloudscraper) project to bypass CloudFlare. All credit goes to him.",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "main": "./src/CF.js",
-  "directories": {
-    "example": "examples"
-  },
   "scripts": {
-    "test": "./tests/index.js"
+    "test": "node test.js",
+    "build": "npm run build:ts",
+    "build:ts": "tsc --build",
+    "clean": "tsc --build --clean"
   },
   "repository": {
     "type": "git",
