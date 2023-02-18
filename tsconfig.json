@@ -6,9 +6,13 @@
         "sourceMap": true,
         "module": "CommonJS",
         "resolveJsonModule": true,
-        "declaration": true
+        "declaration": true,
+        "esModuleInterop": true
     },
     "include": [
         "./src/**/*"
+    ],
+    "exclude": [
+        "db.db"
     ]
 }

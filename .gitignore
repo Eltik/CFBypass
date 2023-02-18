@@ -1,6 +1,1 @@
 node_modules
-__pycache__
-cloudscraper.egg-info
-requests.egg-info
-dist
-build

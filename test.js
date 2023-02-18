@@ -1,12 +1,9 @@
-const CF = require("./built/CF.js").default;
-const cf = new CF(true);
-cf.request({
-    url: "https://justlightnovels.com", options: {
-        method: "GET",
-        headers: {
-            Referer: "https://justlightnovels.com",
-        }
-    }
-}).then((data) => {
-    console.log(data.text());
-}).catch(console.error)
+const API = require("./built/API").default;
+const api = new API({ headless: false });
+console.log("Fetching site justlightnovels.com...");
+api.request("https://www.justlightnovels.com/").then((data) => {
+    console.log("Successfully fetched cookies! Now sending a request with the cookies...");
+    api.request("https://www.justlightnovels.com/").then((data) => {
+        console.log("Successfully sent request with stored cookies!");
+    });
+})
