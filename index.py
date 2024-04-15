@@ -21,7 +21,20 @@ try:
         else:
             req = cloudscraper.create_scraper().get(args.url, timeout=3)
         print(urlsafe_b64encode((req.text.encode("UTF-8"))))
-        print("{ statusCode: " + str(req.status_code) + " }")
+        
+        statusCode = {
+            "statusCode": req.status_code
+        }
+
+        headersDict = dict(req.headers)
+        encoded_headers = str(urlsafe_b64encode(json.dumps(headersDict).encode("ascii")))
+
+        responseHeaders = {
+            "responseHeaders": encoded_headers
+        }
+
+        print(json.dumps(statusCode))
+        print(json.dumps(responseHeaders))
     elif args.method == "POST":
         json_data = json.loads(args.data)
         req = None
@@ -31,7 +44,20 @@ try:
         else:
             req = cloudscraper.create_scraper().post(args.url, data=json_data, timeout=3)
         print(urlsafe_b64encode((req.text.encode("UTF-8"))))
-        print("{ statusCode: " + str(req.status_code) + " }")
+        
+        statusCode = {
+            "statusCode": req.status_code
+        }
+
+        headersDict = dict(req.headers)
+        encoded_headers = str(urlsafe_b64encode(json.dumps(headersDict).encode("ascii")))
+
+        responseHeaders = {
+            "responseHeaders": encoded_headers
+        }
+
+        print(json.dumps(statusCode))
+        print(json.dumps(responseHeaders))
     elif args.method == "COOKIE":
         print(cloudscraper.get_cookie_string(args.url))
     elif args.method == "TOKENS":
@@ -44,6 +70,19 @@ try:
         else:
             req = cloudscraper.create_scraper().get(args.url, timeout=3)
         print(urlsafe_b64encode((req.text.encode("UTF-8"))))
-        print("{ statusCode: " + str(req.status_code) + " }")
+
+        statusCode = {
+            "statusCode": req.status_code
+        }
+
+        headersDict = dict(req.headers)
+        encoded_headers = str(urlsafe_b64encode(json.dumps(headersDict).encode("ascii")))
+
+        responseHeaders = {
+            "responseHeaders": encoded_headers
+        }
+
+        print(json.dumps(statusCode))
+        print(json.dumps(responseHeaders))
 except:
     raise Exception("Could not send data to " + args.url + " with request data " + args.data + ".")

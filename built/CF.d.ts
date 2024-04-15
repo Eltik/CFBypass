@@ -1,6 +1,4 @@
 declare class CloudScraper {
-    private url;
-    private options;
     private isPython3;
     constructor(isPython3?: boolean);
     get(url: string, options?: Options): Promise<Response>;
@@ -37,6 +35,7 @@ type Method = {
 interface Response {
     status: number;
     statusText: string;
+    headers: string | Record<string, string>;
     error: string[];
     text: () => string;
     json: () => string;

@@ -100,24 +100,40 @@ class CloudScraper {
             const childProcess = (0, child_process_1.spawn)(this.isPython3 ? "python3" : "python", args);
             childProcess.stdout.setEncoding("utf8");
             childProcess.stdout.on("data", (data) => {
-                // GitHub CoPilot moment
-                if (data.includes("statusCode")) {
-                    let statusCode = data.split("{ statusCode")[1];
-                    statusCode = statusCode.split("}")[0];
-                    statusCode = statusCode.split(":")[1];
-                    statusCode = statusCode.trim();
-                    result.push({
-                        "status": Number(data)
-                    });
-                    result.push({
-                        "data": data.split("{ statusCode")[0]?.trim()
-                    });
+                const dataString = String(data).split("\n");
+                if (dataString.length < 3) {
+                    return result.push({ data });
                 }
-                else {
-                    result.push({
-                        "data": data
-                    });
+                const body = dataString[0];
+                let statusCode = dataString[1];
+                let headers = dataString[2];
+                try {
+                    statusCode = JSON.parse(statusCode);
+                    statusCode = statusCode.statusCode;
                 }
+                catch (e) {
+                    statusCode = statusCode;
+                }
+                try {
+                    headers = JSON.parse(headers);
+                    let temp = headers.responseHeaders;
+                    headers = (0, js_base64_1.decode)(temp.substring(2).substring(0, temp.length - 1));
+                    try {
+                        headers = JSON.parse(headers);
+                    }
+                    catch (e) {
+                        console.error(e);
+                        headers = headers;
+                    }
+                }
+                catch (e) {
+                    headers = headers;
+                }
+                result.push({
+                    "data": body,
+                    "status": Number(statusCode),
+                    "headers": headers
+                });
             });
             childProcess.stderr.setEncoding('utf8');
             childProcess.stderr.on("data", (err) => {
@@ -130,16 +146,20 @@ class CloudScraper {
             childProcess.on('exit', () => {
                 let data = "";
                 let statusCode = 200;
+                let headers = "";
                 const errors = [];
                 for (let i = 0; i < result.length; i++) {
                     if (result[i].error) {
                         errors.push(result[i]);
                     }
-                    else if (result[i].data) {
+                    if (result[i].data) {
                         data += result[i].data;
                     }
-                    else if (result[i].status) {
+                    if (result[i].status) {
                         statusCode = result[i].status;
+                    }
+                    if (result[i].headers) {
+                        headers = result[i].headers;
                     }
                 }
                 data = (0, js_base64_1.decode)(data.substring(2).substring(0, data.length - 1));
@@ -147,6 +167,7 @@ class CloudScraper {
                     reject({
                         status: 500,
                         statusText: "ERROR",
+                        headers: headers,
                         error: errors,
                         text: () => data,
                         json: () => JSON.parse(data)
@@ -156,6 +177,7 @@ class CloudScraper {
                     resolve({
                         status: statusCode,
                         statusText: "OK",
+                        headers: headers,
                         error: errors,
                         text: () => data,
                         json: () => JSON.parse(data)
