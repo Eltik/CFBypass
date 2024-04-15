@@ -6,7 +6,7 @@
   },
   "name": "cfbypass",
   "description": "Python based CloudFlare bypass. Utilizes [VeNoMouS's CloudScraper](https://github.com/VeNoMouS/cloudscraper) project to bypass CloudFlare. All credit goes to him.",
-  "version": "0.0.12",
+  "version": "0.0.14",
   "main": "./built/CF.js",
   "scripts": {
     "test": "node test.js",

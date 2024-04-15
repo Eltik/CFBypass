@@ -21,6 +21,7 @@ type Options = {
         [key: string]: string;
     };
     body?: string;
+    redirect?: boolean;
 };
 type Method = {
     "GET": string;

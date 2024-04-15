@@ -87,6 +87,7 @@ class CloudScraper {
         return new Promise((resolve, reject) => {
             const args = [(0, path_1.join)(__dirname, "../index.py")];
             args.push("--url", request.url);
+            args.push("--redirect", request.options.redirect ? "true" : "false");
             if (request.options.method) {
                 args.push("--method", String(request.options.method));
             }

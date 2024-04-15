@@ -101,6 +101,7 @@ class CloudScraper {
         return new Promise((resolve, reject) => {
             const args: string[] = [join(__dirname, "../index.py")];
             args.push("--url", request.url);
+            args.push("--redirect", request.options.redirect ? "true" : "false");
 
             if (request.options.method) {
                 args.push("--method", String(request.options.method));
@@ -311,6 +312,7 @@ type Options = {
     method?: Method["GET"] | Method["POST"] | Method["COOKIE"] | Method["TOKENS"];
     headers?: { [key: string]: string };
     body?: string;
+    redirect?: boolean;
 };
 
 type Method = {

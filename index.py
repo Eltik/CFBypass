@@ -10,6 +10,7 @@ parser.add_argument('--url')
 parser.add_argument('--method')
 parser.add_argument('--data')
 parser.add_argument('--headers')
+parser.add_argument('--redirect')
 args = parser.parse_args()
 
 try:
@@ -17,9 +18,9 @@ try:
         req = None
         if args.headers != None:
             headers = json.loads(args.headers)
-            req = cloudscraper.create_scraper().get(args.url, timeout=3, headers=headers)
+            req = cloudscraper.create_scraper().get(args.url, timeout=3, headers=headers, allow_redirects=args.redirect)
         else:
-            req = cloudscraper.create_scraper().get(args.url, timeout=3)
+            req = cloudscraper.create_scraper().get(args.url, timeout=3, allow_redirects=args.redirect)
         print(urlsafe_b64encode((req.text.encode("UTF-8"))))
         
         statusCode = {
@@ -40,9 +41,9 @@ try:
         req = None
         if args.headers != None:
             headers = json.loads(args.headers)
-            req = cloudscraper.create_scraper().post(args.url, data=json_data, timeout=3, headers=headers)
+            req = cloudscraper.create_scraper().post(args.url, data=json_data, timeout=3, headers=headers, allow_redirects=args.redirect)
         else:
-            req = cloudscraper.create_scraper().post(args.url, data=json_data, timeout=3)
+            req = cloudscraper.create_scraper().post(args.url, data=json_data, timeout=3, allow_redirects=args.redirect)
         print(urlsafe_b64encode((req.text.encode("UTF-8"))))
         
         statusCode = {
@@ -66,9 +67,9 @@ try:
         req = None
         if args.headers != None:
             headers = json.loads(args.headers)
-            req = cloudscraper.create_scraper().get(args.url, timeout=3, headers=headers)
+            req = cloudscraper.create_scraper().get(args.url, timeout=3, headers=headers, allow_redirects=args.redirect)
         else:
-            req = cloudscraper.create_scraper().get(args.url, timeout=3)
+            req = cloudscraper.create_scraper().get(args.url, timeout=3, allow_redirects=args.redirect)
         print(urlsafe_b64encode((req.text.encode("UTF-8"))))
 
         statusCode = {
